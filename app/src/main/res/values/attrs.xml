@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stub attributes for old materialiconlib -->
+    <attr name="materialIcon" format="string"/>
+    <attr name="materialIconColor" format="color"/>
+</resources>

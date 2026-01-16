@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/menuEditProfile"
+        app:showAsAction="always"
+        app:materialIcon="pencil"
+        android:title="Edit Profile"
+        app:materialIconColor="@color/white"/>
+</menu>

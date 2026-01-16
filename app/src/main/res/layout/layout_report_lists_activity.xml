@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:id="@+id/reviewsRoot"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rvReports"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:padding="32dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:id="@+id/errorLayoutReviews"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <net.steamcrafted.materialiconlib.MaterialIconView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:alpha="0.3"
+                app:materialIcon="face"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/textColorPrimary"
+                android:textStyle="bold"
+                android:id="@+id/errorTitle"
+                android:text="Failled!"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ErrorBody!"
+                android:id="@+id/errorBody"/>
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:id="@+id/submitViewFab"
+            android:layout_gravity="right|end|bottom"
+            android:src="@drawable/ic_action_add_review"
+            android:scaleType="center"/>
+    </FrameLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

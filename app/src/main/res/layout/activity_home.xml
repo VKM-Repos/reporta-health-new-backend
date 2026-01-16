@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/selectCategoryButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Select Category"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/categoryErrorView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Error: Please select a category"
+        android:textColor="#FF0000"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/selectCategoryButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonHospitalsAndClinics"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Hospitals &amp; Clinics"
+        app:layout_constraintTop_toBottomOf="@id/categoryErrorView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/buttonDrugStores"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Drug Stores"
+        app:layout_constraintTop_toBottomOf="@id/buttonHospitalsAndClinics"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/buttonLabs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Labs"
+        app:layout_constraintTop_toBottomOf="@id/buttonDrugStores"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/buttonImagingCenters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Imaging Centers"
+        app:layout_constraintTop_toBottomOf="@id/buttonLabs"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/selectLocationButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tag Location"
+        app:layout_constraintTop_toBottomOf="@id/buttonImagingCenters"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/submitReportButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Submit Report"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -113,8 +113,7 @@ val networkModule = module {
         clientBuilder.addInterceptor(loggingInterceptor)
 
         // accept header injector
-        clientBuilder.addInterceptor(get(named(ACCEPT_HEADER_INJECTOR)))
-
+        clientBuilder.addInterceptor(get<Interceptor>(named(ACCEPT_HEADER_INJECTOR)))
 
 
         val client = clientBuilder.build()
@@ -138,7 +137,9 @@ val networkModule = module {
         clientBuilder.addInterceptor(loggingInterceptor)
 
         // accept header injector
-        clientBuilder.addInterceptor(get(named(ACCEPT_HEADER_INJECTOR)))
+        clientBuilder.addInterceptor(get<Interceptor>(named(ACCEPT_HEADER_INJECTOR)))
+
+//        clientBuilder.addInterceptor(get(named(ACCEPT_HEADER_INJECTOR)))
 
         // add request header injector
 //        val interceptor: Interceptor = get(named(AUTH_INTERCEPTOR))

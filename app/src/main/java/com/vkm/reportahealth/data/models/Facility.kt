@@ -2,88 +2,66 @@ package com.vkm.reportahealth.data.models
 
 import com.google.gson.annotations.SerializedName
 import org.parceler.Parcel
+import org.parceler.ParcelConstructor
 
-@Parcel
-class Facility {
+@Parcel(Parcel.Serialization.BEAN)
+class Facility(
 
-    val id: Int = 0
-
-    @SerializedName("sig_unique_id")
-    val sigUniqueId: String = ""
-
-    @SerializedName("cac_reg")
-    val cacReg: String = ""
-
-    @SerializedName("comm_date")
-    val commitionDate: String = ""
-
-    @SerializedName("reg_fac_name")
-    val name: String = "Facility name"
-
-    val state: String = ""
-    val statename: String = ""
-    val lga: String = ""
-    val lganame: String = ""
-    val ward: String = ""
+    var lganame: String = "",
+    var statename: String = "",
 
     @SerializedName("fac_type")
-    val facilityType: Int = 0
+    var facilityType: Int = 0
+
+) {
+    @SerializedName("id")
+    var id: Int = 0
+
+    @SerializedName("sig_unique_id")
+    var sigUniqueId: String = ""
+
+    @SerializedName("cac_reg")
+    var cacReg: String = ""
+
+    @SerializedName("reg_fac_name")
+    var name: String = "Facility name"
+
+    var state: String = ""
+    var lga: String = ""
+    var ward: String = ""
 
     @SerializedName("house_no")
-    val houseNo: String = ""
+    var houseNo: String = ""
 
     @SerializedName("street_name")
-    val streetName: String = ""
+    var streetName: String = ""
 
-    val latitude: String = ""
-    val longitude: String = ""
+    var latitude: String = ""
+    var longitude: String = ""
 
     @SerializedName("postal_address")
-    val postalAddress: String = ""
+    var postalAddress: String = ""
 
     @SerializedName("phone_number")
-    val phoneNumber: String = ""
+    var phoneNumber: String = ""
 
     @SerializedName("email_address")
-    val emailAddress: String = ""
+    var emailAddress: String = ""
 
-    val website: String = ""
-    val deleted: String = ""
+    var website: String = ""
 
     @SerializedName("operational_days")
-    val operationDays: String = ""
+    var operationDays: String = ""
 
     @SerializedName("hr_operation")
-    val hrOperation: String = ""
+    var hrOperation: String = ""
 
-    @SerializedName("hs_deleted")
-    val hsDeleted: String = ""
-
-    @SerializedName("ph_deleted")
-    val phDeleted: String = ""
-
-    @SerializedName("lab_deleted")
-    val labDeleted: String = ""
-
-    @SerializedName("im_deleted")
-    val imDeleted: String = ""
-
-    fun getLatitude(): Double {
-        return try {
-            latitude.toDouble()
-        }catch (e: Exception) { 0.0 }
-    }
-
-    fun getLongitude(): Double {
-        return try {
-            longitude.toDouble()
-        }catch (e: Exception) { 0.0 }
-    }
+    // Rename these so they don't clash with the 'latitude' and 'longitude' variables
+    fun fetchLatitude(): Double = try { latitude.toDouble() } catch (e: Exception) { 0.0 }
+    fun fetchLongitude(): Double = try { longitude.toDouble() } catch (e: Exception) { 0.0 }
 
     companion object {
-
         const val TAG = "FacilityData"
         const val STATE = "state"
     }
-
 }

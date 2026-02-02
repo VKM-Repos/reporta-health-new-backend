@@ -1,5 +1,6 @@
 package com.vkm.reportahealth.ui.directions
 
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
@@ -46,6 +47,7 @@ class DirectionsActivity: BaseActivity(), OnMapReadyCallback, DirectionCallback 
     private val dialog by lazy { ProgressDialog(this).apply { setMessage("Processing...") } }
 //    private val timeDistanceView by lazy { findViewById<View>(R.id.directionAndDistanceLayout) }
 
+    @SuppressLint("WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_direction)
@@ -58,7 +60,7 @@ class DirectionsActivity: BaseActivity(), OnMapReadyCallback, DirectionCallback 
 
         binding = ActivityDirectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val navigation = findViewById<BottomNavigationView>(R.id.navigation)
+            val navigation = findViewById<BottomNavigationView>(R.id.navigation)
 
     }
 
@@ -77,7 +79,7 @@ class DirectionsActivity: BaseActivity(), OnMapReadyCallback, DirectionCallback 
             finish()
         }
 
-        val to = LatLng(facility?.getLatitude()!!, facility?.getLongitude()!!)
+        val to = LatLng(facility?.fetchLatitude()!!, facility?.fetchLongitude()!!)
         val local = locationHelper.fetchPersistedLocation()
 
         val from = LatLng(local.latitude, local.longitude)
@@ -85,7 +87,7 @@ class DirectionsActivity: BaseActivity(), OnMapReadyCallback, DirectionCallback 
         binding.navigation.root.setOnClickListener {
 
 //        navigation.setOnClickListener {
-            val gmmIntentUri = Uri.parse("google.navigation:q=${facility?.getLatitude()},${facility?.getLongitude()}")
+            val gmmIntentUri = Uri.parse("google.navigation:q=${facility?.fetchLatitude()},${facility?.fetchLongitude()}")
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapIntent.setPackage("com.google.android.apps.maps")
             if (mapIntent.resolveActivity(packageManager) != null) {
@@ -118,7 +120,7 @@ class DirectionsActivity: BaseActivity(), OnMapReadyCallback, DirectionCallback 
             val to = markerView()
             val bmp = ViewUtils.fromView(to)
             val location = locationHelper.fetchPersistedLocation()
-            val destination = LatLng(facility?.getLatitude()!!, facility?.getLongitude()!!)
+            val destination = LatLng(facility?.fetchLatitude()!!, facility?.fetchLongitude()!!)
 
             googleMap?.addMarker(MarkerOptions().position(destination))
             googleMap?.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bmp))

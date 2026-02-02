@@ -81,8 +81,8 @@ class FacilityDetailsDialog : DialogFragment() {
         binding.buttonReportIssues.setOnClickListener {
             val reportIntent = Intent(requireContext(), SubmitFacilityActivity::class.java).apply {
                 putExtra(FacilitiesActivity.SEARCH_BOX_VALUE_KEY, facility.name)
-                putExtra(FacilitiesActivity.LOCATION_LON, facility.getLongitude())
-                putExtra(FacilitiesActivity.LOCATION_LAT, facility.getLatitude())
+                putExtra(FacilitiesActivity.LOCATION_LON, facility.fetchLongitude())
+                putExtra(FacilitiesActivity.LOCATION_LAT, facility.fetchLatitude())
             }
             startActivity(reportIntent)
         }

@@ -27,6 +27,32 @@ class Auth {
     @SerializedName("user")
     val user: User? = null
 
+    fun login(email: String, password: String, callback: (Boolean, String) -> Unit) {
+        // 1. Validation
+        if (email.isBlank() || password.isBlank()) {
+            callback(false, "Email and password are required")
+            return
+        }
+
+        // 2. Here is where you will place your network logic
+        // For now, this is the 'Simple' boilerplate for a network call:
+
+        /* YOUR_NETWORK_LIBRARY.post("/login", params(email, password)) { response ->
+            if (response.isSuccess) {
+                callback(true, "Login successful")
+            } else {
+                callback(false, "Invalid email or password")
+            }
+        }
+        */
+
+        // TEST MOCK: Delete this once your API is ready
+        if (email == "test@test.com" && password == "1234") {
+            callback(true, "Success")
+        } else {
+            callback(false, "Invalid credentials")
+        }
+    }
     fun isSuccess() = statusText.uppercase().equals("OK") && loggedIn
 
     fun persist(pref: SharedPreferences) {

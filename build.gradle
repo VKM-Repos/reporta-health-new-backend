@@ -4,9 +4,9 @@ buildscript {
     ext {
         kotlin_version = '2.3.0'
         coroutineVersion = '1.0.0'
-        compileSdkVersion = 28
-        targetSdkVersion = 28
-        minSdkVersion = 19
+        compileSdkVersion = 34
+        targetSdkVersion = 34
+        minSdkVersion = 24
         appCompatVer = '1.1.0-alpha02'
         designLibVer = '1.1.0-alpha03'
         constraintLayoutVer = '1.1.3'

@@ -2,24 +2,39 @@ package com.vkm.reportahealth.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import com.vkm.reportahealth.R
 import com.vkm.reportahealth.data.models.FacilityType
 import com.vkm.reportahealth.ui.base.BaseActivity
 import com.vkm.reportahealth.ui.facilities.FacilitiesActivity
-//import kotlinx.android.synthetic.main.activity_select_facility.*
 import org.parceler.Parcels
 import com.vkm.reportahealth.databinding.ActivityHomeBinding
 import com.vkm.reportahealth.databinding.ActivityProfileBinding
 
 class HomeActivity: BaseActivity() {
+
+
+
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("LIFE", "${this::class.simpleName} onResume")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("LIFE", "${this::class.simpleName} onDestroy")
+    }
+
     private lateinit var binding: ActivityHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setContentView(R.layout.activity_select_facility)
 
         setupUI()
+        Log.e("LIFE", "${this::class.simpleName} onCreate")
+
     }
 
     private fun setupUI() {

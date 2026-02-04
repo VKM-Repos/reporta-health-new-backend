@@ -4,10 +4,10 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.vkm.reportahealth.R
@@ -17,8 +17,8 @@ import com.vkm.reportahealth.net.Resource
 import com.vkm.reportahealth.ui.adapters.FacilityReviewAdapter
 import com.vkm.reportahealth.ui.base.BaseActivity
 import com.vkm.reportahealth.utils.Logger
-//import kotlinx.android.synthetic.main.layout_report_lists_activity.*
 import org.koin.android.ext.android.inject
+import kotlinx.coroutines.launch
 import org.parceler.Parcels
 import java.util.*
 import com.vkm.reportahealth.databinding.LayoutAddReviewBinding
@@ -47,23 +47,32 @@ class FacilityReviewsActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.layout_report_lists_activity)
-        binding = LayoutAddReviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 1. First, get the data from the intent
+        facility = Parcels.unwrap(intent?.getParcelableExtra(Facility.TAG))
+
+        // 2. Now that 'facility' exists, you can use its ID
+        lifecycleScope.launch {
+            // Use facility.id (or whatever the ID field is named in your model)
+            viewModel.fetchReviews(facility.id.toString())
+        }
+
+        // 3. Set up the rest of the UI
         binding.rvReports.layoutManager = LinearLayoutManager(this)
         binding.rvReports.adapter = adapter
 
-
         supportActionBar?.title = "Reviews"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        facility = Parcels.unwrap(intent?.getParcelableExtra(Facility.TAG))
+
         adapter.setFacility(facility)
 
-        setupUI()
+        lifecycleScope.launch {
+            setupUI()
+        }
     }
 
-    fun setupUI() {
+    suspend fun setupUI() {
         adapter.setFacility(facility)
         binding.rvReports.layoutManager = LinearLayoutManager(this)
         binding.rvReports.adapter = adapter
@@ -72,14 +81,17 @@ class FacilityReviewsActivity: BaseActivity() {
             showSubmitReviewDialog()
         }
 
+
         loadReviews()
 
         refreshLayout.setOnRefreshListener {
-            viewModel.fetchReviews(facility.sigUniqueId)
+            lifecycleScope.launch {
+                viewModel.fetchReviews(facility.sigUniqueId)
+            }
         }
     }
 
-    private fun loadReviews() {
+    private suspend fun loadReviews() {
         viewModel.fetchReviews(facility.sigUniqueId)
         viewModel.reviewLiveData().observe(this, androidx.lifecycle.Observer { resource ->
             when(resource.state) {
@@ -115,7 +127,7 @@ class FacilityReviewsActivity: BaseActivity() {
         })
     }
 
-    private fun submitReview(content: String) {
+    private suspend fun submitReview(content: String) {
         viewModel.submitReview(facilityId = facility.sigUniqueId, content = content)
         viewModel.submitReviewLiveData().observe(this, androidx.lifecycle.Observer { resource ->
             when(resource.state) {
@@ -123,7 +135,9 @@ class FacilityReviewsActivity: BaseActivity() {
                 Resource.STATE_SUCCESS -> {
                     dialog.cancel()
                     toast("Review Submitted")
-                    viewModel.fetchReviews(facility.sigUniqueId)
+                    lifecycleScope.launch {
+                        viewModel.fetchReviews(facility.sigUniqueId)
+                    }
                 }
                 Resource.STATE_ERROR -> {
                     dialog.cancel()
@@ -150,7 +164,10 @@ class FacilityReviewsActivity: BaseActivity() {
 
             prevText = contentText
             d.dismiss()
-           submitReview(contentText)
+            lifecycleScope.launch {
+                submitReview(contentText)
+
+            }
         })
 
         dialog.create().show()

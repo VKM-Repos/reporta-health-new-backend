@@ -2,10 +2,12 @@ package com.vkm.reportahealth.ui.splashscreen
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vkm.reportahealth.data.models.Auth
 import com.vkm.reportahealth.net.HttpService
 import com.vkm.reportahealth.net.Resource
 import com.vkm.reportahealth.net.payloads.DeviceData
+import kotlinx.coroutines.launch
 import java.util.*
 
 class AuthViewModel(private val httpService: HttpService, private val auth: Auth): ViewModel() {
@@ -25,22 +27,25 @@ class AuthViewModel(private val httpService: HttpService, private val auth: Auth
 
         val password = "android$deviceID"
         val data = DeviceData(deviceId, password)
-        httpService.registerDevice(data).process { auth, throwable ->
-            when {
-                auth != null -> {
-                    resource.state = Resource.STATE_SUCCESS
-                    resource.data = auth
-                    responseLiveData.postValue(resource)
-                }
-                throwable != null -> {
-                    val message = throwable.message ?: "failed to complete request. Please retry"
-                    resource.state = Resource.STATE_ERROR
-                    resource.message = message
-                    responseLiveData.postValue(resource)
+        viewModelScope.launch {
+            httpService.registerDevice(data).process { auth, throwable ->
+                when {
+                    auth != null -> {
+                        resource.state = Resource.STATE_SUCCESS
+                        resource.data = auth
+                        responseLiveData.postValue(resource)
+                    }
+
+                    throwable != null -> {
+                        val message =
+                            throwable.message ?: "failed to complete request. Please retry"
+                        resource.state = Resource.STATE_ERROR
+                        resource.message = message
+                        responseLiveData.postValue(resource)
+                    }
                 }
             }
         }
     }
-
     fun responseLiveData() = responseLiveData
 }

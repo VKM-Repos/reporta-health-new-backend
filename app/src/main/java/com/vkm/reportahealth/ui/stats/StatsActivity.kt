@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.vkm.reportahealth.R
 import com.vkm.reportahealth.data.models.StatData
 import com.vkm.reportahealth.data.models.StatDataKey
 import com.vkm.reportahealth.databinding.LayoutActivityStatsBinding

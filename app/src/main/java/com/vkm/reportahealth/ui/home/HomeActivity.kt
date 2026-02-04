@@ -3,13 +3,11 @@ package com.vkm.reportahealth.ui.home
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import com.vkm.reportahealth.R
 import com.vkm.reportahealth.data.models.FacilityType
 import com.vkm.reportahealth.ui.base.BaseActivity
 import com.vkm.reportahealth.ui.facilities.FacilitiesActivity
 import org.parceler.Parcels
-import com.vkm.reportahealth.databinding.ActivityHomeBinding
-import com.vkm.reportahealth.databinding.ActivityProfileBinding
+import com.vkm.reportahealth.databinding.ActivitySelectFacilityBinding
 
 class HomeActivity: BaseActivity() {
 
@@ -25,11 +23,14 @@ class HomeActivity: BaseActivity() {
         super.onDestroy()
         Log.e("LIFE", "${this::class.simpleName} onDestroy")
     }
+    private lateinit var binding: ActivitySelectFacilityBinding
 
-    private lateinit var binding: ActivityHomeBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityHomeBinding.inflate(layoutInflater)
+
+
+        binding = ActivitySelectFacilityBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
 
         setupUI()

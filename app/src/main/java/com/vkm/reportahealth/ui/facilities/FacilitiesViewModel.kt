@@ -1,5 +1,6 @@
 package com.vkm.reportahealth.ui.facilities
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.location.Location
 import android.os.Looper
@@ -51,6 +52,7 @@ class FacilitiesViewModel(private val httpService: HttpService,
         settingsClient.checkLocationSettings(locationSettingsRequest)
 
         val locationCallback = object: LocationCallback() {
+            @SuppressLint("NullSafeMutableLiveData")
             override fun onLocationResult(p0: LocationResult?) {
 
                 val location = p0?.lastLocation
@@ -74,7 +76,7 @@ class FacilitiesViewModel(private val httpService: HttpService,
     }
 
 
-    fun loadFacilities(currentLocation: Location, facType: Int ) {
+    suspend fun loadFacilities(currentLocation: Location, facType: Int ) {
 
         val resource = Resource<ArrayList<Facility>>()
         facilitiesLiveData.postValue(resource)
@@ -107,12 +109,12 @@ class FacilitiesViewModel(private val httpService: HttpService,
     }
 
 
-    fun searchFacilities(keyWord: String) {
+    suspend fun searchFacilities(keyWord: String) {
         if (keyWord.length < 3) return //this is done so as to ensure reasonable search query and inturn improve performance
         val resource = Resource<ArrayList<Facility>>().apply { state = Resource.STATE_LOADING }
         searchResultLiveData.value = resource
         requestCall?.cancel()
-        requestCall = httpService.search(keyWord)
+        httpService.search(keyWord).also { requestCall = it }
         requestCall!!.process { response, throwable ->
             when {
                 response != null -> {

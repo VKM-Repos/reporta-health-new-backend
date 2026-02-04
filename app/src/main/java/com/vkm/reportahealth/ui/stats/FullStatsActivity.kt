@@ -2,8 +2,6 @@ package com.vkm.reportahealth.ui.stats
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer

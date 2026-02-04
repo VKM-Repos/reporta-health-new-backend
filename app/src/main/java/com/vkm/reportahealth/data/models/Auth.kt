@@ -37,14 +37,8 @@ class Auth {
         // 2. Here is where you will place your network logic
         // For now, this is the 'Simple' boilerplate for a network call:
 
-        /* YOUR_NETWORK_LIBRARY.post("/login", params(email, password)) { response ->
-            if (response.isSuccess) {
-                callback(true, "Login successful")
-            } else {
-                callback(false, "Invalid email or password")
-            }
-        }
-        */
+
+
 
         // TEST MOCK: Delete this once your API is ready
         if (email == "test@test.com" && password == "1234") {

@@ -6,26 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.vkm.reportahealth.R
 import com.vkm.reportahealth.data.models.Facility
 import com.vkm.reportahealth.data.models.FacilityType
 import com.vkm.reportahealth.net.Resource
 import com.vkm.reportahealth.ui.adapters.FacilitiesListAdapter
 import com.vkm.reportahealth.ui.dialogs.FacilityDetailsDialog
-//import kotlinx.android.synthetic.main.facility_list_bottom_sheet.*
-//import org.koin.android.viewmodel.ext.android.viewModel
 import org.parceler.Parcels
 import com.vkm.reportahealth.databinding.FacilityListBottomSheetBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import com.vkm.reportahealth.ui.facilities.FacilitiesViewModel
-import com.vkm.reportahealth.ui.facilities.viewModel
+import kotlinx.coroutines.launch
 import kotlin.properties.ReadOnlyProperty
 
 
 
-//import org.koin.androidx.viewmodel.ext.android.viewModel
 //
 private val viewModel: FacilitiesViewModel by viewModel()
 
@@ -48,8 +43,6 @@ class ListFacilitiesBottomSheet: BottomSheetDialogFragment() {
     lateinit var facilityType: FacilityType
 
     private var _binding: FacilityListBottomSheetBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
-//    private val binding get() = _binding!!
 
     companion object {
 
@@ -102,12 +95,20 @@ class ListFacilitiesBottomSheet: BottomSheetDialogFragment() {
         }
 
         binding.bottomSheetTitle.text = "${facilityType.title} around you"
-        viewModel.loadFacilities(currentLocation, facilityType.id)
+        lifecycleScope.launch {
+            viewModel.loadFacilities(currentLocation, facilityType.id)
+            
+
+        }
 
         binding.errorLayoutListFacilities.setOnClickListener {
             binding.dataLayout.visibility = View.VISIBLE
             binding.errorLayoutListFacilities.visibility = View.GONE
-            viewModel.loadFacilities(currentLocation, facilityType.id)
+            lifecycleScope.launch {
+                viewModel.loadFacilities(currentLocation, facilityType.id)
+
+            }
+
         }
     }
 

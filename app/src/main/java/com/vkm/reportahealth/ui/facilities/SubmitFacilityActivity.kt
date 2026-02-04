@@ -5,7 +5,6 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.TextView
@@ -18,12 +17,10 @@ import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.vkm.reportahealth.R
 import com.vkm.reportahealth.data.models.ReviewUser
-import com.vkm.reportahealth.databinding.ActivityProfileBinding
 import com.vkm.reportahealth.net.Resource
 import com.vkm.reportahealth.ui.ReportaEditText
 import com.vkm.reportahealth.ui.base.BaseActivity
 import com.vkm.reportahealth.utils.*
-//import kotlinx.android.synthetic.main.layout_submit_report.*
 import org.koin.android.ext.android.inject
 import com.vkm.reportahealth.databinding.ActivitySubmitFacilityBinding
 
@@ -190,18 +187,13 @@ class SubmitFacilityActivity: BaseActivity() {
             AutocompleteActivityMode.FULLSCREEN,
             mutableListOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
         )
-            //  .setInitialQuery(getQuery())
-            // .setHint(getHint())
+
             .setCountry("NG")
-            // .setLocationBias(getLocationBias())
-            // .setLocationRestriction(getLocationRestriction())
-            // .setTypeFilter(getTypeFilter())
+
             .build(this)
         startActivityForResult(autocompleteIntent, RC_SELECT_LOCATION)
 
-        /* val placeIntent = PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-             .setFilter(AutocompleteFilter.Builder().setCountry("NG").build()).build(this)
-         startActivityForResult(placeIntent, RC_SELECT_LOCATION)*/
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

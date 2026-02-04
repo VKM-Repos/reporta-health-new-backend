@@ -2,9 +2,11 @@ package com.vkm.reportahealth.ui.stats.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vkm.reportahealth.data.models.Facility
 import com.vkm.reportahealth.net.HttpService
 import com.vkm.reportahealth.net.Resource
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**
@@ -21,7 +23,7 @@ class FacilityListViewModel(private val httpService: HttpService) : ViewModel() 
 
         val resource = Resource<ArrayList<Facility>>()
         facilitiesLiveData.postValue(resource)
-
+        viewModelScope.launch {
         httpService.fetchFacilitiesByLga(
             lgaId, state, page, count
         ).process { response, throwable ->
@@ -46,7 +48,7 @@ class FacilityListViewModel(private val httpService: HttpService) : ViewModel() 
                 }
             }
         }
-    }
+    }}
 fun responseLiveData() = facilitiesLiveData
     fun errorLiveData() = errorLiveData
 }

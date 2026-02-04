@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -24,6 +25,7 @@ import com.vkm.reportahealth.utils.*
 import org.koin.android.ext.android.inject
 import org.parceler.Parcels
 import com.vkm.reportahealth.databinding.ActivityFacilityListBinding
+import kotlinx.coroutines.launch
 
 class FacilitiesActivity: BaseActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityFacilityListBinding
@@ -89,10 +91,13 @@ class FacilitiesActivity: BaseActivity(), OnMapReadyCallback {
         binding.rvFacilitiesSearchResult.layoutManager = LinearLayoutManager(this)
         binding.rvFacilitiesSearchResult.adapter = filterAdapter
 
+
         binding.filterFacilitiesEditText.onTextChange { newText ->
-            viewModel.searchFacilities(newText.trim())
-        }
-    }
+            // Use lifecycleScope to run the suspend function safely
+            lifecycleScope.launch {
+                viewModel.searchFacilities(newText.trim())
+            }
+        }}
 
     private fun showData(hasData: Boolean) {
         binding.rvFacilitiesSearchResult.visibility = if (hasData) View.VISIBLE else View.GONE

@@ -11,7 +11,6 @@ import com.vkm.reportahealth.ui.base.BaseActivity
 import com.vkm.reportahealth.ui.stats.viewmodels.FacilityListViewModel
 import com.vkm.reportahealth.utils.hide
 import com.vkm.reportahealth.utils.show
-//import kotlinx.android.synthetic.main.activity_facility_list.*
 import org.koin.android.ext.android.inject
 import com.vkm.reportahealth.databinding.ActivityFacilityListBinding
 
@@ -34,7 +33,6 @@ class FacilityListActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityFacilityListBinding.inflate(layoutInflater)
         setContentView(binding.root)
-//        setContentView(R.layout.activity_facility_list)
 
         val lgaId = intent.getStringExtra(LGA_ID)
         val stateId = intent.getStringExtra(STATE_ID)

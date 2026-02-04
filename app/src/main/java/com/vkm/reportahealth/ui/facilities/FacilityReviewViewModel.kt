@@ -15,7 +15,7 @@ class FacilityReviewViewModel(private val service: HttpService,
     private val reviewsLiveData = MutableLiveData<Resource<ArrayList<Review>>>()
     private val submitReviewLiveData = MutableLiveData<Resource<ReviewFacilityResponse>>()
 
-    fun fetchReviews(id: String) {
+    suspend fun fetchReviews(id: String) {
 
         val resource = Resource<ArrayList<Review>>()
         reviewsLiveData.value = resource
@@ -37,7 +37,7 @@ class FacilityReviewViewModel(private val service: HttpService,
         }
     }
 
-    fun submitReview(facilityId: String, content: String) {
+    suspend fun submitReview(facilityId: String, content: String) {
         val resource = Resource<ReviewFacilityResponse>()
         submitReviewLiveData.value = resource
 

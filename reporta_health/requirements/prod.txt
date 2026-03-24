@@ -1,0 +1,10 @@
+-r base.txt
+
+# Production Server
+gunicorn==21.2.0
+
+# Monitoring & Error Tracking
+sentry-sdk==1.39.2
+
+# Performance
+whitenoise==6.6.0

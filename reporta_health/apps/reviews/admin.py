@@ -25,19 +25,19 @@ class ReviewAdmin(admin.ModelAdmin):
         'facility',
         'user',
         'rating',
-        'title',
+        'body',
         'is_verified',
         'helpful_count',
         'created_at'
     )
     list_filter = ('rating', 'is_verified', 'created_at')
-    search_fields = ('facility__name', 'user__email', 'title', 'comment')
+    search_fields = ('facility__name', 'user__email', 'body')
     readonly_fields = ('user', 'facility', 'helpful_count', 'created_at', 'updated_at')
     inlines = [ReviewImageInline]
     
     fieldsets = (
         ('Review Information', {
-            'fields': ('facility', 'user', 'rating', 'title', 'comment', 'visit_date')
+            'fields': ('facility', 'user', 'rating', 'body', 'visit_date')
         }),
         ('Status', {
             'fields': ('is_verified', 'helpful_count')

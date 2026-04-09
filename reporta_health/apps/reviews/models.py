@@ -23,14 +23,36 @@ class Review(models.Model):
         related_name='reviews'
     )
     
+    #body
+    body = models.TextField(
+     _  ('review text'),
+        blank=True,
+        default=''
+    )
+
+    is_anonymous = models.BooleanField(
+        _('anonymous'),
+        default=False
+    )
+
+    is_published = models.BooleanField(
+        _('published'),
+        default=True
+    )
+
+    flag_count = models.PositiveIntegerField(
+        _('flag count'),
+        default=0
+    )
+
     # Review content
     rating = models.IntegerField(
         _('rating'),
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text=_('Rating from 1 to 5 stars')
     )
-    title = models.CharField(_('title'), max_length=200)
-    comment = models.TextField(_('comment'))
+    # title = models.CharField(_('title'), max_length=200)
+    # comment = models.TextField(_('comment'))
     visit_date = models.DateField(_('visit date'), blank=True, null=True)
     
     # Review status

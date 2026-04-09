@@ -33,8 +33,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'facility_name',
             'user',
             'rating',
-            'title',
-            'comment',
+            'body',
             'visit_date',
             'is_verified',
             'helpful_count',
@@ -81,7 +80,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Review
-        fields = ('facility', 'rating', 'title', 'comment', 'visit_date')
+        fields = ('facility', 'rating', 'body', 'visit_date')
     
     def validate(self, data):
         """

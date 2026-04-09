@@ -90,6 +90,9 @@ DATABASES = {
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
 
+#system checks to silence (e.g. for testing or known issues)
+SILENCED_SYSTEM_CHECKS = []
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

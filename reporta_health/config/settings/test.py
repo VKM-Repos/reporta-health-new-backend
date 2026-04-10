@@ -2,7 +2,7 @@
 Test settings for Reporta Health
 Inherits from base, overrides for fast isolated testing
 """
-
+import os
 from config.settings.base import *  # noqa
 
 # Use a separate test database
@@ -56,4 +56,4 @@ DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 MEDIA_ROOT = '/tmp/reporta_test_media/'
 
 DEBUG = False
-SECRET_KEY = 'test-secret-key-not-for-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'test-secret-key-not-for-production')

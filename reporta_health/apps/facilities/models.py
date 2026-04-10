@@ -30,7 +30,7 @@ class Facility(models.Model):
     name = models.CharField(_('facility name'), max_length=255, db_index=True)
     facility_type = models.CharField(
         _('facility type'),
-        max_length=20,
+        max_length=50,
         choices=FACILITY_TYPES,
         db_index=True
     )
@@ -45,7 +45,19 @@ class Facility(models.Model):
     )
     city = models.CharField(_('city'), max_length=100, blank=True)
     state = models.CharField(_('state'), max_length=100, blank=True)
-    
+    lga = models.CharField(
+        _('local government area'),
+        max_length=100,
+        blank=True,
+        db_index=True
+    )
+
+    operating_hours = models.JSONField(
+        _('operating hours'),
+        default=dict,
+        blank=True,
+        help_text=_('Structured weekly schedule')
+    )
     # Contact Information
     phone_number = models.CharField(_('phone number'), max_length=20, blank=True)
     email = models.EmailField(_('email'), blank=True)

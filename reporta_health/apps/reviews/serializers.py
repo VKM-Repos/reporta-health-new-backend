@@ -34,6 +34,9 @@ class ReviewSerializer(serializers.ModelSerializer):
             'user',
             'rating',
             'body',
+            'is_anonymous',
+            'is_published',
+            'flag_count',
             'visit_date',
             'is_verified',
             'helpful_count',
@@ -41,7 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
-        read_only_fields = ('id', 'user', 'helpful_count', 'is_verified', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'user', 'helpful_count','flag_count', 'is_published', 'is_verified', 'created_at', 'updated_at')
     
     def validate(self, data):
         """
@@ -80,7 +83,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Review
-        fields = ('facility', 'rating', 'body', 'visit_date')
+        fields = ('facility', 'rating', 'body','is_anonymous', 'visit_date')
     
     def validate(self, data):
         """

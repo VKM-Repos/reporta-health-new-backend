@@ -33,3 +33,4 @@ WARNING 2026-03-23 16:34:56,803 log Not Found: /favicon.ico
 WARNING 2026-03-23 16:34:56,805 basehttp "GET /favicon.ico HTTP/1.1" 404 12946
 INFO 2026-03-23 16:35:08,104 basehttp "GET /api/docs/ HTTP/1.1" 200 13819
 INFO 2026-03-23 16:35:10,563 basehttp "GET /api/schema/ HTTP/1.1" 200 141540
+INFO 2026-04-10 16:13:05,104 autoreload Watching for file changes with StatReloader

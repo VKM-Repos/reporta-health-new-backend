@@ -15,6 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'storages',
     'django_extensions',
     'djoser',
+    'leaflet',
     
     # Local apps
     'apps.users',
@@ -176,6 +178,7 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password/{uid}/{token}',
     'SERIALIZERS': {
         'user_create': 'apps.users.serializers.UserCreateSerializer',
+        'user_create_password_retype': 'apps.users.serializers.UserCreateSerializer',  # 👈 add this
         'user': 'apps.users.serializers.UserSerializer',
         'current_user': 'apps.users.serializers.UserSerializer',
     },
@@ -261,6 +264,30 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+# LEAFLET_CONFIG = {
+#     'DEFAULT_CENTER': (6.5244, 3.3792),  # Lagos
+#     'DEFAULT_ZOOM': 13,
+#     'MIN_ZOOM': 3,
+#     'MAX_ZOOM': 18,
+#     'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+#     # 'TILES': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+#     # 'ATTRIBUTION_PREFIX': '© OpenStreetMap contributors',
+# }
+
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (6.5244, 3.3792),
+    'DEFAULT_ZOOM': 13,
+    'MIN_ZOOM': 3,
+    'MAX_ZOOM': 18,
+    'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    'ATTRIBUTION_PREFIX': '© OpenStreetMap contributors | © CARTO',
+    'EXTRA_SCRIPT': """
+        window.addEventListener('map:init', function(e) {
+            e.detail.map.locate({setView: true, maxZoom: 16});
+        });
+    """,
 }
 
 # Create logs directory if it doesn't exist

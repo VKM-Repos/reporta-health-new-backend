@@ -266,16 +266,6 @@ LOGGING = {
     },
 }
 
-# LEAFLET_CONFIG = {
-#     'DEFAULT_CENTER': (6.5244, 3.3792),  # Lagos
-#     'DEFAULT_ZOOM': 13,
-#     'MIN_ZOOM': 3,
-#     'MAX_ZOOM': 18,
-#     'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-#     # 'TILES': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-#     # 'ATTRIBUTION_PREFIX': '© OpenStreetMap contributors',
-# }
-
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (6.5244, 3.3792),
     'DEFAULT_ZOOM': 13,

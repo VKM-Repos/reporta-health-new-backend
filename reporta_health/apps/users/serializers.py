@@ -11,7 +11,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     """
     Serializer for user registration
     """
-    re_password = serializers.CharField(write_only=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User

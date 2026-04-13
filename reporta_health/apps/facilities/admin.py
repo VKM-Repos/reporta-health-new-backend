@@ -4,7 +4,7 @@ Admin configuration for Facility models
 
 from django.contrib.gis import admin
 from .models import Facility, FacilityImage
-
+from leaflet.admin import LeafletGeoAdmin
 
 class FacilityImageInline(admin.TabularInline):
     """
@@ -16,7 +16,7 @@ class FacilityImageInline(admin.TabularInline):
 
 
 @admin.register(Facility)
-class FacilityAdmin(admin.GISModelAdmin):
+class FacilityAdmin(LeafletGeoAdmin):
     """
     Admin for Facility model with map widget
     """

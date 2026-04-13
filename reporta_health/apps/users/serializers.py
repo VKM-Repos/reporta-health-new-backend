@@ -11,9 +11,10 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     """
     Serializer for user registration
     """
+
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'password', 'phone_number')
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'phone_number', 'password', 're_password')
 
 
 class UserSerializer(serializers.ModelSerializer):

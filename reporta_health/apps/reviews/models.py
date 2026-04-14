@@ -25,9 +25,7 @@ class Review(models.Model):
     
     #body
     body = models.TextField(
-     _  ('review text'),
-        blank=True,
-        default=''
+     _  ('review text'),  
     )
 
     is_anonymous = models.BooleanField(
@@ -51,8 +49,6 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text=_('Rating from 1 to 5 stars')
     )
-    # title = models.CharField(_('title'), max_length=200)
-    # comment = models.TextField(_('comment'))
     visit_date = models.DateField(_('visit date'), blank=True, null=True)
     
     # Review status

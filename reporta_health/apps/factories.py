@@ -29,7 +29,7 @@ class UserFactory(DjangoModelFactory):
     username = factory.Sequence(lambda n: f'user{n}')
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
-    phone_number = factory.Sequence(lambda n: f'+2348{n:08d}')
+    phone_number = factory.Faker('numerify', text='+234##########')
     is_verified = True
     is_active = True
     is_staff = False
@@ -61,8 +61,7 @@ class FacilityFactory(DjangoModelFactory):
 
     # Default location: central Lagos
     location = factory.LazyFunction(lambda: Point(3.3792, 6.5244, srid=4326))
-
-    phone_number = factory.Sequence(lambda n: f'+2348{n:08d}')
+    phone_number = factory.Faker('numerify', text='+234##########')
     email = factory.Sequence(lambda n: f'facility{n}@example.com')
     is_verified = True
     is_active = True

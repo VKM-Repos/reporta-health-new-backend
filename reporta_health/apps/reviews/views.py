@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from .models import Review, ReviewImage
 from .serializers import ReviewSerializer, ReviewCreateSerializer, ReviewImageSerializer
-
+from django.shortcuts import get_object_or_404
 
 class FacilityReviewListView(generics.ListAPIView):
     """
@@ -48,7 +48,7 @@ class ReviewCreateView(generics.CreateAPIView):
         self.perform_create(serializer)
         
         # Return full review details
-        review = Review.objects.get(id=serializer.data['id'])
+        review = serializer.instance
         return Response(
             ReviewSerializer(review, context={'request': request}).data,
             status=status.HTTP_201_CREATED
@@ -103,10 +103,19 @@ class ReviewImageUploadView(generics.CreateAPIView):
     """
     serializer_class = ReviewImageSerializer
     permission_classes = [permissions.IsAuthenticated]
+        
+    def create(self, request, *args, **kwargs):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        
+        if review.user != self.request.user:
+            raise PermissionDenied("You can only upload images to your own reviews.")
+
+        return super().create(request, *args, **kwargs)
     
     def perform_create(self, serializer):
         review_id = self.kwargs.get('review_id')
-        review = Review.objects.get(id=review_id)
+        review = get_object_or_404(Review, id=review_id)
         
         # Check if user is the review author
         if review.user != self.request.user:

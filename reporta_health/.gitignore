@@ -71,4 +71,6 @@ dump.rdb
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
+*.pydlogs/
+*.log
+logs/

@@ -35,7 +35,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'rating',
             'body',
             'is_anonymous',
-            'is_published',
+            'is_published',   
             'flag_count',
             'visit_date',
             'is_verified',
@@ -83,7 +83,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Review
-        fields = ('facility', 'rating', 'body','is_anonymous', 'visit_date')
+        fields = ('facility', 'rating', 'body', 'is_anonymous', 'visit_date')
     
     def validate(self, data):
         """
@@ -92,7 +92,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         facility = data.get('facility')
         
-        if request and facility:
+        if request and facility and not self.instance:
             existing_review = Review.objects.filter(
                 user=request.user,
                 facility=facility

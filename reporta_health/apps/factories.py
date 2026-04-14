@@ -103,14 +103,11 @@ class ReportFactory(DjangoModelFactory):
     class Meta:
         model = 'reports.FacilityReport'
 
-    # user is nullable (anonymous reports allowed)
-    user = factory.SubFactory(UserFactory)
+    reporter = factory.SubFactory(UserFactory)
     facility = factory.SubFactory(FacilityFactory)
-    category = factory.fuzzy.FuzzyChoice([
-        'drug_shortage', 'equipment_failure', 'staff_conduct',
-        'cleanliness', 'billing', 'other'
+    reason = factory.fuzzy.FuzzyChoice([
+        'fake', 'closed', 'wrong_info', 'inappropriate', 'duplicate', 'spam', 'other'
     ])
-    severity = factory.fuzzy.FuzzyChoice(['low', 'medium', 'high', 'critical'])
+    
     description = factory.Faker('paragraph', nb_sentences=4)
     status = 'pending'
-    is_anonymous = False

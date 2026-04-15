@@ -29,7 +29,7 @@ class UserFactory(DjangoModelFactory):
     username = factory.Sequence(lambda n: f'user{n}')
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
-    phone_number = factory.Faker('phone_number')
+    phone_number = factory.Faker('numerify', text='+234##########')
     is_verified = True
     is_active = True
     is_staff = False
@@ -61,8 +61,7 @@ class FacilityFactory(DjangoModelFactory):
 
     # Default location: central Lagos
     location = factory.LazyFunction(lambda: Point(3.3792, 6.5244, srid=4326))
-
-    phone_number = factory.Faker('phone_number')
+    phone_number = factory.Faker('numerify', text='+234##########')
     email = factory.Sequence(lambda n: f'facility{n}@example.com')
     is_verified = True
     is_active = True
@@ -104,14 +103,11 @@ class ReportFactory(DjangoModelFactory):
     class Meta:
         model = 'reports.FacilityReport'
 
-    # user is nullable (anonymous reports allowed)
-    user = factory.SubFactory(UserFactory)
+    reporter = factory.SubFactory(UserFactory)
     facility = factory.SubFactory(FacilityFactory)
-    category = factory.fuzzy.FuzzyChoice([
-        'drug_shortage', 'equipment_failure', 'staff_conduct',
-        'cleanliness', 'billing', 'other'
+    reason = factory.fuzzy.FuzzyChoice([
+        'fake', 'closed', 'wrong_info', 'inappropriate', 'duplicate', 'spam', 'other'
     ])
-    severity = factory.fuzzy.FuzzyChoice(['low', 'medium', 'high', 'critical'])
+    
     description = factory.Faker('paragraph', nb_sentences=4)
     status = 'pending'
-    is_anonymous = False

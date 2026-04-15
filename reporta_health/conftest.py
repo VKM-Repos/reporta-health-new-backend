@@ -160,11 +160,10 @@ def review(db, review_factory, user, facility):
 
 @pytest.fixture
 def report(db, report_factory, user, facility):
-    """A single pending report."""
-    return report_factory(user=user, facility=facility)
+    return report_factory(reporter=user, facility=facility)
 
 
-@pytest.fixture
-def anonymous_report(db, report_factory, facility):
-    """A report submitted without a user."""
-    return report_factory(user=None, facility=facility)
+# @pytest.fixture
+# def anonymous_report(db, report_factory, facility):
+#     """A report submitted without a user."""
+#     return report_factory(user=None, facility=facility)

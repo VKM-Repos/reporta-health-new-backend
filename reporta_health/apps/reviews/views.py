@@ -51,7 +51,7 @@ class ReviewCreateView(generics.CreateAPIView):
         self.perform_create(serializer)
         
         # Return full review details
-        review = Review.objects.get(id=serializer.data['id'])
+        review = serializer.instance
         return Response(
             ReviewSerializer(review, context={'request': request}).data,
             status=status.HTTP_201_CREATED

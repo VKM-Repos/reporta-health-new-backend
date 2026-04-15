@@ -51,7 +51,7 @@ class ReviewCreateView(generics.CreateAPIView):
         self.perform_create(serializer)
         
         # Return full review details
-        review = Review.objects.get(id=serializer.data['id'])
+        review = serializer.instance
         return Response(
             ReviewSerializer(review, context={'request': request}).data,
             status=status.HTTP_201_CREATED
@@ -73,10 +73,10 @@ class ReviewUpdateView(generics.UpdateAPIView):
     Update own review
     PUT/PATCH /api/reviews/:id/
     """
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().select_related('user')
     serializer_class = ReviewCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
@@ -89,7 +89,7 @@ class ReviewDeleteView(generics.DestroyAPIView):
     Delete own review
     DELETE /api/reviews/:id/
     """
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().select_related('user')
     permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self):

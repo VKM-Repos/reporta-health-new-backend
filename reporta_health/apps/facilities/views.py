@@ -17,7 +17,9 @@ from .serializers import (
     FacilityImageSerializer
 )
 from .filters import FacilityFilter
-
+from django.db.models import Prefetch
+from apps.reviews.models import Review
+from django.shortcuts import get_object_or_404
 
 class FacilityListView(generics.ListAPIView):
     """
@@ -81,7 +83,7 @@ def nearby_facilities(request):
         location__distance_lte=(user_location, D(m=radius))
     ).annotate(
         distance=Distance('location', user_location)
-    ).order_by('distance')
+    ).select_related().prefetch_related('images').order_by('distance')
     
     # Apply facility type filter if provided
     facility_type = request.query_params.get('facility_type')
@@ -110,7 +112,7 @@ class FacilityDetailView(generics.RetrieveAPIView):
     Get facility details
     GET /api/facilities/:id/
     """
-    queryset = Facility.objects.filter(is_active=True).prefetch_related('images', 'reviews')
+    queryset = Facility.objects.filter(is_active=True).prefetch_related('images', Prefetch('reviews', queryset=Review.objects.only('id', 'rating')))
     serializer_class = FacilityDetailSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -154,4 +156,5 @@ class FacilityImageUploadView(generics.CreateAPIView):
     
     def perform_create(self, serializer):
         facility_id = self.kwargs.get('facility_id')
-        serializer.save(facility_id=facility_id)
+        facility = get_object_or_404(Facility, id=facility_id)
+        serializer.save(facility=facility)

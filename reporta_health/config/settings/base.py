@@ -287,12 +287,28 @@ LEAFLET_CONFIG = {
     'DEFAULT_ZOOM': 13,
     'MIN_ZOOM': 3,
     'MAX_ZOOM': 18,
+    'LOCATE_CONTROL': True,
     'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     'ATTRIBUTION_PREFIX': '© OpenStreetMap contributors | © CARTO',
     'EXTRA_SCRIPT': """
-        window.addEventListener('map:init', function(e) {
-            e.detail.map.locate({setView: true, maxZoom: 16});
-        });
+    window.addEventListener('map:init', function (e) {
+        var map = e.detail.map;
+        // Check if the map exists and trigger locate
+        if (map) {
+            map.locate({
+                setView: true, 
+                maxZoom: 16,
+                enableHighAccuracy: true
+            });
+            
+            // Optional: Add a marker when found
+            map.on('locationfound', function(e) {
+                L.marker(e.latlng).addTo(map)
+                    .bindPopup("You are here").openPopup();
+            });
+        }
+    });
+
     """,
 }
 

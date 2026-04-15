@@ -17,8 +17,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from apps.core.throttling import ReportCreateThrottle
 
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied
+
 
 class ReportCreateView(generics.CreateAPIView):
     """

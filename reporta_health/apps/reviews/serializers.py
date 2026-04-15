@@ -44,7 +44,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
-        read_only_fields = ('id', 'user', 'helpful_count', 'is_verified', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'user', 'helpful_count','flag_count', 'is_published', 'is_verified', 'created_at', 'updated_at')
     
     def validate(self, data):
         """

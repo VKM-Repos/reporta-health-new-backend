@@ -13,7 +13,8 @@ from .serializers import (
     ReportStatusUpdateSerializer,
     ReportImageSerializer
 )
-
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 
 class ReportCreateView(generics.CreateAPIView):
     """
@@ -83,24 +84,28 @@ class ReportStatusUpdateView(generics.UpdateAPIView):
 
 
 class ReportImageUploadView(generics.CreateAPIView):
-    """
-    Upload evidence image for a report
-    POST /api/reports/:report_id/images/
-    """
     serializer_class = ReportImageSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
-    def perform_create(self, serializer):
+
+    def create(self, request, *args, **kwargs):
         report_id = self.kwargs.get('report_id')
-        report = FacilityReport.objects.get(id=report_id)
-        
-        # Check if user is the reporter
-        if report.reporter != self.request.user:
-            raise permissions.PermissionDenied(
+
+        # 1. Check if report exists → 404
+        report = get_object_or_404(FacilityReport, id=report_id)
+
+        # 2. Check ownership → 403
+        if report.reporter != request.user:
+            raise PermissionDenied(
                 "You can only upload images to your own reports."
             )
-        
+
+        # 3. Now validate serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         serializer.save(report=report)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserReportsView(generics.ListAPIView):

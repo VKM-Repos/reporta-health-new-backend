@@ -12,6 +12,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 from rest_framework import routers
+from apps.users.views import ThrottledTokenObtainPairView, ThrottledTokenRefreshView
 
 # API Router
 router = routers.DefaultRouter()
@@ -25,6 +26,10 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
+
+    path('api/auth/jwt/create/', ThrottledTokenObtainPairView.as_view(), name='jwt-create'),
+    path('api/auth/jwt/refresh/', ThrottledTokenRefreshView.as_view(), name='jwt-refresh'),
+
     # Authentication (Djoser)
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),

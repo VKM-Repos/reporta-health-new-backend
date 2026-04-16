@@ -15,6 +15,9 @@ from .serializers import (
 )
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
+from apps.core.throttling import ReportCreateThrottle
+
+
 
 class ReportCreateView(generics.CreateAPIView):
     """
@@ -24,6 +27,7 @@ class ReportCreateView(generics.CreateAPIView):
     queryset = FacilityReport.objects.all()
     serializer_class = ReportCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ReportCreateThrottle]
     
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)

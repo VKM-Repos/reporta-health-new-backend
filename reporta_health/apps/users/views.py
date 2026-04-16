@@ -7,6 +7,19 @@ from rest_framework.response import Response
 from .models import User
 from .serializers import UserSerializer, UserUpdateSerializer
 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from apps.core.throttling import AuthRateThrottle
+
+
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    """JWT login with rate limiting."""
+    throttle_classes = [AuthRateThrottle]
+
+
+class ThrottledTokenRefreshView(TokenRefreshView):
+    """JWT refresh with rate limiting."""
+    throttle_classes = [AuthRateThrottle]
+
 
 class CurrentUserView(generics.RetrieveUpdateAPIView):
     """

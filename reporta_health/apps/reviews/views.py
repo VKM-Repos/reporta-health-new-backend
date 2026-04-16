@@ -10,6 +10,7 @@ from rest_framework import filters
 from .models import Review, ReviewImage
 from .serializers import ReviewSerializer, ReviewCreateSerializer, ReviewImageSerializer
 from django.shortcuts import get_object_or_404
+from apps.core.throttling import ReviewCreateThrottle
 
 class FacilityReviewListView(generics.ListAPIView):
     """
@@ -37,6 +38,8 @@ class ReviewCreateView(generics.CreateAPIView):
     """
     serializer_class = ReviewCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ReviewCreateThrottle]
+
     
     def create(self, request, *args, **kwargs):
         # Add facility to request data
@@ -95,30 +98,25 @@ class ReviewDeleteView(generics.DestroyAPIView):
             raise PermissionDenied("You can only delete your own reviews.")
         return obj
 
-
 class ReviewImageUploadView(generics.CreateAPIView):
     """
     Upload image for a review
     POST /api/reviews/:review_id/images/
+    
     """
     serializer_class = ReviewImageSerializer
     permission_classes = [permissions.IsAuthenticated]
-        
+
     def create(self, request, *args, **kwargs):
         review_id = self.kwargs.get('review_id')
+        # 1. Check if review exists → 404
         review = get_object_or_404(Review, id=review_id)
-        
-        if review.user != self.request.user:
+        # 2. Check ownership → 403
+        if review.user != request.user:
             raise PermissionDenied("You can only upload images to your own reviews.")
-
-        return super().create(request, *args, **kwargs)
-    
-    def perform_create(self, serializer):
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
-        
-        # Check if user is the review author
-        if review.user != self.request.user:
-            raise PermissionDenied("You can only upload images to your own reviews.")
-        
+        # 3. Now validate serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         serializer.save(review=review)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+# Note: We can add image deletion endpoint later if needed, but for now users can just update their review to remove images.

@@ -31,8 +31,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 # Use in-memory cache (no Redis dependency in tests)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',  # was LocMemCache
+
     }
+}
+
+
+
+# Disable all throttling in tests — rate limits have no place in a test suite
+REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    'DEFAULT_THROTTLE_CLASSES': [],
+    # 'DEFAULT_THROTTLE_RATES': {},
 }
 
 # Disable Celery — tasks run synchronously in tests

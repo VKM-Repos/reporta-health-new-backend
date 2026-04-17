@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS
+    'apps.core.middleware.RequestResponseLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -279,6 +280,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+    },
+     'api': {                         
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+        'propagate': False,
     },
 }
 

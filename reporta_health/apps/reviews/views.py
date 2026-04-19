@@ -11,6 +11,7 @@ from .models import Review, ReviewImage
 from .serializers import ReviewSerializer, ReviewCreateSerializer, ReviewImageSerializer
 from django.shortcuts import get_object_or_404
 from apps.core.throttling import ReviewCreateThrottle
+from drf_spectacular.utils import extend_schema
 
 class FacilityReviewListView(generics.ListAPIView):
     """
@@ -26,6 +27,8 @@ class FacilityReviewListView(generics.ListAPIView):
     
     def get_queryset(self):
         facility_id = self.kwargs.get('facility_id')
+        if getattr(self, 'swagger_fake_view', False):
+            return Review.objects.none()
         return Review.objects.filter(
             facility_id=facility_id
         ).select_related('user', 'facility').prefetch_related('images')
@@ -83,7 +86,7 @@ class ReviewUpdateView(generics.UpdateAPIView):
             raise PermissionDenied("You can only edit your own reviews.")
         return obj
 
-
+@extend_schema(responses={204: None})
 class ReviewDeleteView(generics.DestroyAPIView):
     """
     Delete own review

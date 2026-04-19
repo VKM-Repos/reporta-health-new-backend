@@ -9,6 +9,8 @@ from .serializers import UserSerializer, UserUpdateSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.core.throttling import AuthRateThrottle
+from apps.reviews.models import Review
+from apps.reviews.serializers import ReviewSerializer
 
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
@@ -46,9 +48,9 @@ class UserReviewsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        from apps.reviews.models import Review
+        if getattr(self, 'swagger_fake_view', False):
+            return Review.objects.none()
         return Review.objects.filter(user=self.request.user).select_related('facility')
     
     def get_serializer_class(self):
-        from apps.reviews.serializers import ReviewSerializer
         return ReviewSerializer

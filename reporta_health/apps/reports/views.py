@@ -121,6 +121,8 @@ class UserReportsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return FacilityReport.objects.none()
         return FacilityReport.objects.filter(
             reporter=self.request.user
         ).select_related('facility').prefetch_related('images')

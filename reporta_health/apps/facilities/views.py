@@ -17,6 +17,8 @@ from .serializers import (
     FacilityImageSerializer
 )
 from .filters import FacilityFilter
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 
 class FacilityListView(generics.ListAPIView):
@@ -40,6 +42,16 @@ class FacilityListView(generics.ListAPIView):
     ordering = ['-average_rating']
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("lat", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=True, description="Latitude"),
+        OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=True, description="Longitude"),
+        OpenApiParameter("radius", OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Search radius in meters"),
+        OpenApiParameter("limit", OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Max results"),
+    ],
+    responses={200: FacilityListSerializer(many=True)},
+    description="Get facilities near a specific location"
+)
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def nearby_facilities(request):
@@ -134,7 +146,7 @@ class FacilityUpdateView(generics.UpdateAPIView):
     serializer_class = FacilityCreateSerializer
     permission_classes = [permissions.IsAdminUser]
 
-
+@extend_schema(responses={204: None})
 class FacilityDeleteView(generics.DestroyAPIView):
     """
     Delete facility (admin only)

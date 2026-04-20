@@ -26,6 +26,39 @@ class Facility(models.Model):
         ('other', 'Other'),
     ]
     
+
+    OWNERSHIP_TYPES = [
+        ('federal_government', 'Federal Government'),
+        ('state_government',   'State Government'),
+        ('lga',                'Local Government (LGA)'),
+        ('private',            'Private'),
+        ('mission',            'Mission/Faith-based'),
+        ('ngo',                'NGO'),
+        ('other',              'Other'),
+    ]
+
+    CARE_LEVELS = [
+        ('primary',   'Primary'),
+        ('secondary', 'Secondary'),
+        ('tertiary',  'Tertiary'),
+        ('other',     'Other'),
+    ]
+
+    ownership = models.CharField(
+        _('ownership type'),
+        max_length=50,
+        choices=OWNERSHIP_TYPES,
+        default='private',
+        db_index=True,
+    )
+    care_level = models.CharField(
+        _('care level'),
+        max_length=20,
+        choices=CARE_LEVELS,
+        default='primary',
+        db_index=True,
+    )
+
     # Basic Information
     name = models.CharField(_('facility name'), max_length=255, db_index=True)
     facility_type = models.CharField(

@@ -4,6 +4,7 @@ URL patterns for facilities app
 
 from django.urls import path
 from . import views
+from . import analytics_views   
 from apps.reviews import views as review_views
 
 app_name = 'facilities'
@@ -18,4 +19,12 @@ urlpatterns = [
     path('<int:facility_id>/images/', views.FacilityImageUploadView.as_view(), name='facility-image-upload'),
     path('<int:facility_id>/reviews/create/', review_views.ReviewCreateView.as_view(), name='facility-review-create'),
     path('<int:facility_id>/reviews/', review_views.FacilityReviewListView.as_view(), name='facility-reviews'),
+
+    # ── analytics ─────────────────────────────────────────────────────────
+    path('stats/by-state/', analytics_views.FacilityStatsByAllStatesView.as_view(), name='stats-all-states'),
+    path('stats/by-state/<str:state>/', analytics_views.FacilityStatsByStateView.as_view(), name='stats-by-state'),
+    path('stats/by-state/<str:state>/ownership/', analytics_views.FacilityStatsByStateOwnershipView.as_view(), name='stats-state-ownership'),
+    path('stats/by-state/<str:state>/care-level/', analytics_views.FacilityStatsByStateCareLevelView.as_view(), name='stats-state-care-level'),
+    path('stats/by-state/<str:state>/lgas/', analytics_views.FacilityStatsByLGAsInStateView.as_view(), name='stats-lgas-in-state'),
+    path('stats/by-state/<str:state>/lgas/<str:lga>/', analytics_views.FacilityStatsByLGAView.as_view(), name='stats-by-lga'),
 ]

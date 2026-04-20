@@ -1,10 +1,10 @@
 """
 Analytics / statistics views for health facility data.
 
-All views perform pure-DB aggregation (values + annotate) — no
-Python-side grouping.  Results are cached with Django's cache
-framework (15-minute TTL) since these are expensive GROUP BY
-queries over potentially large datasets.
+All views perform pure-DB aggregation (values + annotate). Some views
+do lightweight Python-side grouping to reshape flat DB rows into nested
+structures (state_map, lga_map) — the DB still does all the counting.
+Results are cached with Django's cache framework (15-minute TTL).
 """
 
 from __future__ import annotations
@@ -168,25 +168,26 @@ class FacilityStatsByStateView(APIView):
 
     def get(self, request, state: str):
         # Normalise: "lagos" → "Lagos" for consistent lookup
-        state_name = state.strip().title()
+        state_name = state.strip()
         cache_key = f"stats:facilities:state:{state_name.lower()}"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
         qs = _active_qs().filter(state__iexact=state_name)
-        total = qs.count()
 
-        if total == 0:
+        if not qs.exists():
             return Response(
                 {"detail": f"No active facilities found for state '{state_name}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        actual_state = qs.values_list("state", flat=True).first()
+        breakdown = _type_breakdown(qs) 
         data = {
-            "state":     state_name,
-            "total":     total,
-            "breakdown": _type_breakdown(qs),
+            "state":     actual_state,
+            "total":     sum(b["count"] for b in breakdown),
+            "breakdown": breakdown,
         }
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)
@@ -212,25 +213,26 @@ class FacilityStatsByStateOwnershipView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, state: str):
-        state_name = state.strip().title()
+        state_name = state.strip()
         cache_key = f"stats:facilities:state:{state_name.lower()}:ownership"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
         qs = _active_qs().filter(state__iexact=state_name)
-        total = qs.count()
 
-        if total == 0:
+        if not qs.exists():
             return Response(
                 {"detail": f"No active facilities found for state '{state_name}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        actual_state = qs.values_list("state", flat=True).first()
+        breakdown = _ownership_breakdown(qs)
         data = {
-            "state":     state_name,
-            "total":     total,
-            "breakdown": _ownership_breakdown(qs),
+            "state":     actual_state,
+            "total":     sum(b["count"] for b in breakdown),
+            "breakdown": breakdown,
         }
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)
@@ -256,25 +258,26 @@ class FacilityStatsByStateCareLevelView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, state: str):
-        state_name = state.strip().title()
+        state_name = state.strip()
         cache_key = f"stats:facilities:state:{state_name.lower()}:care_level"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
         qs = _active_qs().filter(state__iexact=state_name)
-        total = qs.count()
 
-        if total == 0:
+        if not qs.exists():
             return Response(
                 {"detail": f"No active facilities found for state '{state_name}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
+    
+        actual_state = qs.values_list("state", flat=True).first()
+        breakdown = _care_level_breakdown(qs)
         data = {
-            "state":     state_name,
-            "total":     total,
-            "breakdown": _care_level_breakdown(qs),
+            "state":     actual_state,
+            "total":     sum(b["count"] for b in breakdown),
+            "breakdown": breakdown,
         }
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)
@@ -338,49 +341,44 @@ class FacilityStatsByAllLGAsView(APIView):
 
 @extend_schema(
     tags=["Analytics"],
-    summary="Facility counts for a single LGA",
-    description="Returns total and per-facility-type breakdown for the given LGA name.",
+    summary="Facility counts for a single LGA within a state",
     parameters=[
-        OpenApiParameter(
-            "lga",
-            OpenApiTypes.STR,
-            location=OpenApiParameter.PATH,
-            description="LGA name (e.g. Ikeja, Eti-Osa)",
-        )
+        OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="State name"),
+        OpenApiParameter("lga", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="LGA name"),
     ],
     responses={200: LGAStatsSerializer},
 )
 class FacilityStatsByLGAView(APIView):
     """
-    GET /api/facilities/stats/by-lga/<lga>/
+    GET /api/facilities/stats/by-state/<state>/lgas/<lga>/
     """
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, lga: str):
-        lga_name = lga.strip().title()
-        cache_key = f"stats:facilities:lga:{lga_name.lower()}"
+    def get(self, request, state: str, lga: str):
+        state_name = state.strip()
+        lga_name = lga.strip()
+        cache_key = f"stats:facilities:state:{state_name.lower()}:lga:{lga_name.lower()}"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
-        qs = _active_qs().filter(lga__iexact=lga_name)
-        total = qs.count()
+        qs = _active_qs().filter(state__iexact=state_name, lga__iexact=lga_name)
 
-        if total == 0:
+        if not qs.exists():
             return Response(
-                {"detail": f"No active facilities found for LGA '{lga_name}'."},
+                {"detail": f"No active facilities found for LGA '{lga_name}' in '{state_name}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Grab the parent state from the first matching record
-        first = qs.values("state").first()
-        state_name = first["state"] if first else ""
+        actual_state = qs.values_list("state", flat=True).first()
+        actual_lga = qs.values_list("lga", flat=True).first()
+        breakdown = _type_breakdown(qs)
 
         data = {
-            "lga":       lga_name,
-            "state":     state_name,
-            "total":     total,
-            "breakdown": _type_breakdown(qs),
+            "lga":       actual_lga,
+            "state":     actual_state,
+            "total":     sum(b["count"] for b in breakdown),
+            "breakdown": breakdown,
         }
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)

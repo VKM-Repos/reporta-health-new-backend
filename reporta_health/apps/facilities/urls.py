@@ -25,7 +25,6 @@ urlpatterns = [
     path('stats/by-state/<str:state>/', analytics_views.FacilityStatsByStateView.as_view(), name='stats-by-state'),
     path('stats/by-state/<str:state>/ownership/', analytics_views.FacilityStatsByStateOwnershipView.as_view(), name='stats-state-ownership'),
     path('stats/by-state/<str:state>/care-level/', analytics_views.FacilityStatsByStateCareLevelView.as_view(), name='stats-state-care-level'),
-    path('stats/by-lga/', analytics_views.FacilityStatsByAllLGAsView.as_view(), name='stats-all-lgas'),
-    path('stats/by-lga/<str:lga>/', analytics_views.FacilityStatsByLGAView.as_view(), name='stats-by-lga'),
-
+    path('stats/by-state/<str:state>/lgas/', analytics_views.FacilityStatsByLGAsInStateView.as_view(), name='stats-lgas-in-state'),
+    path('stats/by-state/<str:state>/lgas/<str:lga>/', analytics_views.FacilityStatsByLGAView.as_view(), name='stats-by-lga'),
 ]

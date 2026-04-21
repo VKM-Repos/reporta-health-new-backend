@@ -23,4 +23,7 @@ class FacilityFilter(django_filters.FilterSet):
             'facility_type': ['exact'],
             'city': ['exact', 'icontains'],
             'state': ['exact', 'icontains'],
+            'lga': ['exact', 'icontains'],    
+            'ownership': ['exact'],            
+            'care_level': ['exact'], 
         }

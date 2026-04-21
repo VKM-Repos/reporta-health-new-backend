@@ -17,8 +17,10 @@ from .serializers import (
     FacilityImageSerializer
 )
 from .filters import FacilityFilter
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter,inline_serializer
 from drf_spectacular.types import OpenApiTypes
+from rest_framework.views import APIView
+from rest_framework import serializers as drf_serializers
 
 
 class FacilityListView(generics.ListAPIView):
@@ -167,3 +169,55 @@ class FacilityImageUploadView(generics.CreateAPIView):
     def perform_create(self, serializer):
         facility_id = self.kwargs.get('facility_id')
         serializer.save(facility_id=facility_id)
+
+
+@extend_schema(
+    tags=["Facilities"],
+    summary="List all facility type choices",
+    responses={200: inline_serializer(
+        name='FacilityType',
+        fields={
+            'value': drf_serializers.CharField(),
+            'label': drf_serializers.CharField(),
+        }
+    )}
+)
+class FacilityTypesView(APIView):
+    """
+    List all facility type choices
+    GET /api/facilities/types/
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        data = [
+            {'value': value, 'label': label}
+            for value, label in Facility.FACILITY_TYPES
+        ]
+        return Response(data)
+
+@extend_schema(
+    tags=["Facilities"],
+    summary="List all states with active facilities",
+    responses={200: inline_serializer(
+        name='FacilityState',
+        fields={'states': drf_serializers.ListField(child=drf_serializers.CharField())}
+    )}
+)
+class FacilityStatesView(APIView):
+    """
+    List all distinct states that have active facilities
+    GET /api/facilities/states/
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        states = (
+            Facility.objects
+            .filter(is_active=True)
+            .exclude(state='')
+            .values_list('state', flat=True)
+            .distinct()
+            .order_by('state')
+        )
+        return Response(list(states))

@@ -340,6 +340,7 @@ class FacilityStatsByAllLGAsView(APIView):
 
 
 @extend_schema(
+    operation_id="facility_stats_single_lga",
     tags=["Analytics"],
     summary="Facility counts for a single LGA within a state",
     parameters=[
@@ -380,5 +381,58 @@ class FacilityStatsByLGAView(APIView):
             "total":     sum(b["count"] for b in breakdown),
             "breakdown": breakdown,
         }
+        cache.set(cache_key, data, CACHE_TTL)
+        return Response(data)
+
+@extend_schema(
+    operation_id="facility_stats_lgas_in_state",
+    tags=["Analytics"],
+    summary="Facility counts by LGA within a state",
+    parameters=[
+        OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="State name"),
+    ],
+    responses={200: LGAStatsSerializer(many=True)},
+)
+class FacilityStatsByLGAsInStateView(APIView):
+    """
+    GET /api/facilities/stats/by-state/<state>/lgas/
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, state: str):
+        state_name = state.strip()
+        cache_key = f"stats:facilities:state:{state_name.lower()}:lgas"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached)
+
+        qs = _active_qs().filter(state__iexact=state_name)
+
+        if not qs.exists():
+            return Response(
+                {"detail": f"No active facilities found for state '{state_name}'."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        rows = (
+            qs.exclude(Q(lga="") | Q(lga__isnull=True))
+              .values("lga", "facility_type")
+              .annotate(count=Count("id"))
+              .order_by("lga", "-count")
+        )
+
+        lga_map: dict[str, dict] = {}
+        for row in rows:
+            lga = row["lga"]
+            if lga not in lga_map:
+                lga_map[lga] = {"lga": lga, "state": state_name, "total": 0, "breakdown": []}
+            lga_map[lga]["total"] += row["count"]
+            lga_map[lga]["breakdown"].append({
+                "facility_type":       row["facility_type"],
+                "facility_type_label": FACILITY_TYPE_MAP.get(row["facility_type"], row["facility_type"]),
+                "count":               row["count"],
+            })
+
+        data = sorted(lga_map.values(), key=lambda x: x["lga"])
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)

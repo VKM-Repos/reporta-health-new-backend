@@ -10,6 +10,8 @@ from apps.reviews import views as review_views
 app_name = 'facilities'
 
 urlpatterns = [
+    path('types/', views.FacilityTypesView.as_view(), name='facility-types'),
+    path('states/', views.FacilityStatesView.as_view(), name='facility-states'),
     path('', views.FacilityListView.as_view(), name='facility-list'),
     path('nearby/', views.nearby_facilities, name='nearby-facilities'),
     path('<int:pk>/', views.FacilityDetailView.as_view(), name='facility-detail'),

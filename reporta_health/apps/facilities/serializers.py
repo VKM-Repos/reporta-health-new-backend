@@ -206,3 +206,52 @@ class FacilityCreateSerializer(serializers.ModelSerializer):
             validated_data['location'] = Point(longitude, latitude, srid=4326)
         
         return super().update(instance, validated_data)
+
+        # apps/facilities/serializers.py
+
+# ── Analytics serializers ────────────────────────────────────────────────────
+
+class FacilityTypeCountSerializer(serializers.Serializer):
+    """Single facility_type → count pair."""
+    facility_type       = serializers.CharField()
+    facility_type_label = serializers.CharField()
+    count               = serializers.IntegerField()
+
+
+class StateStatsSerializer(serializers.Serializer):
+    """Per-state breakdown by facility_type."""
+    state      = serializers.CharField()
+    total      = serializers.IntegerField()
+    breakdown  = FacilityTypeCountSerializer(many=True)
+
+
+class LGAStatsSerializer(serializers.Serializer):
+    """Per-LGA breakdown by facility_type."""
+    lga       = serializers.CharField()
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = FacilityTypeCountSerializer(many=True)
+
+
+class OwnershipCountSerializer(serializers.Serializer):
+    ownership       = serializers.CharField()
+    ownership_label = serializers.CharField()
+    count           = serializers.IntegerField()
+
+
+class CareLevelCountSerializer(serializers.Serializer):
+    care_level       = serializers.CharField()
+    care_level_label = serializers.CharField()
+    count            = serializers.IntegerField()
+
+
+class StateOwnershipStatsSerializer(serializers.Serializer):
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = OwnershipCountSerializer(many=True)
+
+
+class StateCareLevelStatsSerializer(serializers.Serializer):
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = CareLevelCountSerializer(many=True)

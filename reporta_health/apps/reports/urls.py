@@ -4,6 +4,7 @@ URL patterns for reports app
 
 from django.urls import path
 from . import views
+from . import analytics_views
 
 app_name = 'reports'
 
@@ -14,4 +15,9 @@ urlpatterns = [
     path('<int:pk>/', views.ReportDetailView.as_view(), name='report-detail'),
     path('<int:pk>/status/', views.ReportStatusUpdateView.as_view(), name='report-status-update'),
     path('<int:report_id>/images/', views.ReportImageUploadView.as_view(), name='report-image-upload'),
+
+     # analytics
+    path('stats/by-reason/', analytics_views.ReportStatsByReasonView.as_view(), name='stats-by-reason'),
+    path('stats/by-facility-type/', analytics_views.ReportStatsByFacilityTypeView.as_view(), name='stats-by-facility-type'),
+    path('stats/by-state/', analytics_views.ReportStatsByStateView.as_view(), name='stats-by-state'),
 ]

@@ -24,6 +24,7 @@ urlpatterns = [
 
     # ── analytics ─────────────────────────────────────────────────────────
     path('stats/by-state/', analytics_views.FacilityStatsByAllStatesView.as_view(), name='stats-all-states'),
+    path('stats/by-lga/', analytics_views.FacilityStatsByAllLGAsView.as_view(), name='stats-all-lgas'),
     path('stats/by-state/<str:state>/', analytics_views.FacilityStatsByStateView.as_view(), name='stats-by-state'),
     path('stats/by-state/<str:state>/ownership/', analytics_views.FacilityStatsByStateOwnershipView.as_view(), name='stats-state-ownership'),
     path('stats/by-state/<str:state>/care-level/', analytics_views.FacilityStatsByStateCareLevelView.as_view(), name='stats-state-care-level'),

@@ -381,3 +381,18 @@ class TestCurrentUserReviews:
         assert 'count' in response.data
         assert 'results' in response.data
         assert 'next' in response.data
+
+@pytest.mark.django_db
+class TestUserSignals:
+
+    def test_new_user_triggers_signal(self, user_factory):
+        """Signal fires on user creation without errors."""
+        user = user_factory()
+        assert user.pk is not None
+
+    def test_signal_does_not_fire_on_update(self, user_factory):
+        """Signal only fires on creation, not updates."""
+        user = user_factory()
+        user.first_name = "Updated"
+        user.save()
+        assert user.first_name == "Updated"

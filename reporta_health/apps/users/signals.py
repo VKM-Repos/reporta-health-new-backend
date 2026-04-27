@@ -16,5 +16,15 @@ def user_post_save(sender, instance, created, **kwargs):
     Actions to perform after user is saved.
     Placeholder for welcome email — to be implemented with Celery.
     """
-    if created:
-        logger.info(f"New user registered: {instance.email}")
+    if not created:
+        return  # early return for readability
+
+    logger.info(
+        "New user registered",
+        extra={
+            "user_id": instance.pk,
+            "email": instance.email,
+        }
+    )
+    # TODO: send welcome email via Celery
+    # send_welcome_email.delay(instance.pk)

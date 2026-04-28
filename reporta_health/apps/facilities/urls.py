@@ -5,6 +5,7 @@ URL patterns for facilities app
 from django.urls import path
 from . import views
 from . import analytics_views   
+from . import sarc_views
 from apps.reviews import views as review_views
 
 app_name = 'facilities'
@@ -13,6 +14,8 @@ urlpatterns = [
     path('types/', views.FacilityTypesView.as_view(), name='facility-types'),
     path('states/', views.FacilityStatesView.as_view(), name='facility-states'),
     path('', views.FacilityListView.as_view(), name='facility-list'),
+    path('sarcs/', sarc_views.SARCListView.as_view(), name='sarc-list'),
+    path('sarcs/<int:pk>/', sarc_views.SARCDetailView.as_view(), name='sarc-detail'),
     path('nearby/', views.nearby_facilities, name='nearby-facilities'),
     path('<int:pk>/', views.FacilityDetailView.as_view(), name='facility-detail'),
     path('create/', views.FacilityCreateView.as_view(), name='facility-create'),

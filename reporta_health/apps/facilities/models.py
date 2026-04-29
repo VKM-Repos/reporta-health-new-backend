@@ -58,6 +58,12 @@ class Facility(models.Model):
         default='primary',
         db_index=True,
     )
+    has_fistula_programme = models.BooleanField(
+    _('has fistula programme'),
+    default=False,
+    help_text=_('Is free fistula surgery available at this facility?'),
+    db_index=True,
+    )
 
     # Basic Information
     name = models.CharField(_('facility name'), max_length=255, db_index=True)

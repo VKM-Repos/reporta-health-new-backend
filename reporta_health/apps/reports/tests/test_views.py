@@ -17,21 +17,21 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
-REPORT_LIST_URL = '/api/reports/'
-REPORT_CREATE_URL = '/api/reports/create/'
-MY_REPORTS_URL = '/api/reports/my-reports/'
+REPORT_LIST_URL = '/api/v1/reports/'
+REPORT_CREATE_URL = '/api/v1/reports/create/'
+MY_REPORTS_URL = '/api/v1/reports/my-reports/'
 
 
 def report_detail_url(pk):
-    return f'/api/reports/{pk}/'
+    return f'/api/v1/reports/{pk}/'
 
 
 def report_status_url(pk):
-    return f'/api/reports/{pk}/status/'
+    return f'/api/v1/reports/{pk}/status/'
 
 
 def report_images_url(report_id):
-    return f'/api/reports/{report_id}/images/'
+    return f'/api/v1/reports/{report_id}/images/'
 
 
 def create_report_payload(**overrides):

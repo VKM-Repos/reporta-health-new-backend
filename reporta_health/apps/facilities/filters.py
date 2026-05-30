@@ -4,7 +4,7 @@ Filters for Facility model
 
 import django_filters
 from .models import Facility
-
+from django.contrib.gis.geos import Polygon
 
 class FacilityFilter(django_filters.FilterSet):
     """
@@ -17,6 +17,27 @@ class FacilityFilter(django_filters.FilterSet):
     has_emergency_service = django_filters.BooleanFilter()
     is_verified = django_filters.BooleanFilter()
     
+
+    min_lat = django_filters.NumberFilter(method='filter_bbox')
+    max_lat = django_filters.NumberFilter(method='filter_bbox')
+    min_lng = django_filters.NumberFilter(method='filter_bbox')
+    max_lng = django_filters.NumberFilter(method='filter_bbox')
+
+    def filter_bbox(self, queryset, name, value):
+        min_lat = self.data.get('min_lat')
+        max_lat = self.data.get('max_lat')
+        min_lng = self.data.get('min_lng')
+        max_lng = self.data.get('max_lng')
+
+        if all([min_lat, max_lat, min_lng, max_lng]):
+            bbox = Polygon.from_bbox((
+                float(min_lng), float(min_lat),
+                float(max_lng), float(max_lat)
+            ))
+            bbox.srid = 4326
+            return queryset.filter(location__within=bbox)
+        return queryset
+
     class Meta:
         model = Facility
         fields = {
@@ -26,4 +47,4 @@ class FacilityFilter(django_filters.FilterSet):
             'lga': ['exact', 'icontains'],    
             'ownership': ['exact'],            
             'care_level': ['exact'], 
-        }
+        }  

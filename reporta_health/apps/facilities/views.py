@@ -21,7 +21,13 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter,inline_seriali
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.views import APIView
 from rest_framework import serializers as drf_serializers
+from rest_framework.pagination import PageNumberPagination
 
+
+class FacilityPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'  
+    max_page_size = 100                 
 
 class FacilityListView(generics.ListAPIView):
     """
@@ -42,6 +48,7 @@ class FacilityListView(generics.ListAPIView):
     search_fields = ['name', 'description', 'services', 'address']
     ordering_fields = ['name', 'average_rating', 'created_at', 'total_reviews']
     ordering = ['-average_rating']
+    pagination_class = FacilityPagination  
 
 
 @extend_schema(
@@ -103,7 +110,12 @@ def nearby_facilities(request):
         queryset = queryset.filter(facility_type=facility_type)
     
     # Apply limit
-    limit = int(request.query_params.get('limit', 20))
+    try:
+        limit = int(request.query_params.get('limit', 20))
+        # limit = int(limit_param) if limit_param else 20
+    except (ValueError, TypeError):
+        limit = 20
+    # limit = int(request.query_params.get('limit', 20))
     queryset = queryset[:limit]
     
     # Serialize and return

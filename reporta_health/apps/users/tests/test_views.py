@@ -230,7 +230,7 @@ class TestPasswordReset:
 @pytest.mark.django_db
 class TestCurrentUserProfile:
 
-    URL = '/api/users/me/'
+    URL = '/api/v1/users/me/'
 
     # --- GET ---
 
@@ -338,7 +338,7 @@ class TestCurrentUserProfile:
 @pytest.mark.django_db
 class TestCurrentUserReviews:
 
-    URL = '/api/users/me/reviews/'
+    URL = '/api/v1/users/me/reviews/'
 
     def test_unauthenticated_returns_401(self, api_client):
         response = api_client.get(self.URL)

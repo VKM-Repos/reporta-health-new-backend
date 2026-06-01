@@ -20,22 +20,22 @@ from django.contrib.gis.geos import Point
 # Helpers
 # ---------------------------------------------------------------------------
 
-LIST_URL       = '/api/facilities/'
-NEARBY_URL     = '/api/facilities/nearby/'
-CREATE_URL     = '/api/facilities/create/'
+LIST_URL       = '/api/v1/facilities/'
+NEARBY_URL     = '/api/v1/facilities/nearby/'
+CREATE_URL     = '/api/v1/facilities/create/'
 
 
 def detail_url(pk):
-    return f'/api/facilities/{pk}/'
+    return f'/api/v1/facilities/{pk}/'
 
 def update_url(pk):
-    return f'/api/facilities/{pk}/update/'
+    return f'/api/v1/facilities/{pk}/update/'
 
 def delete_url(pk):
-    return f'/api/facilities/{pk}/delete/'
+    return f'/api/v1/facilities/{pk}/delete/'
 
 def images_url(facility_id):
-    return f'/api/facilities/{facility_id}/images/'
+    return f'/api/v1/facilities/{facility_id}/images/'
 
 
 def create_payload(**overrides):

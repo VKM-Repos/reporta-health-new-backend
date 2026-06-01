@@ -17,9 +17,9 @@ from apps.reports.models import FacilityReport
 # Helpers
 # ---------------------------------------------------------------------------
 
-STATS_BY_REASON_URL = '/api/reports/stats/by-reason/'
-STATS_BY_FACILITY_TYPE_URL = '/api/reports/stats/by-facility-type/'
-STATS_BY_STATE_URL = '/api/reports/stats/by-state/'
+STATS_BY_REASON_URL = '/api/v1/reports/stats/by-reason/'
+STATS_BY_FACILITY_TYPE_URL = '/api/v1/reports/stats/by-facility-type/'
+STATS_BY_STATE_URL = '/api/v1/reports/stats/by-state/'
 
 
 def _make_facility(state='Lagos', facility_type='hospital'):

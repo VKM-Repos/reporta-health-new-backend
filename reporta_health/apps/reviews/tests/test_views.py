@@ -19,27 +19,27 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def facility_reviews_url(facility_id):
-    return f'/api/facilities/{facility_id}/reviews/'
+    return f'/api/v1/facilities/{facility_id}/reviews/'
 
 
 def facility_reviews_create_url(facility_id):
-    return f'/api/facilities/{facility_id}/reviews/create/'
+    return f'/api/v1/facilities/{facility_id}/reviews/create/'
 
 
 def review_detail_url(pk):
-    return f'/api/reviews/{pk}/'
+    return f'/api/v1/reviews/{pk}/'
 
 
 def review_update_url(pk):
-    return f'/api/reviews/{pk}/update/'
+    return f'/api/v1/reviews/{pk}/update/'
 
 
 def review_delete_url(pk):
-    return f'/api/reviews/{pk}/delete/'
+    return f'/api/v1/reviews/{pk}/delete/'
 
 
 def review_images_url(review_id):
-    return f'/api/reviews/{review_id}/images/'
+    return f'/api/v1/reviews/{review_id}/images/'
 
 
 def create_review_payload(**overrides):

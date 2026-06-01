@@ -56,7 +56,7 @@ def facility_set(db):
 
 @pytest.mark.django_db
 class TestFacilityStatsByAllStates:
-    url = "/api/facilities/stats/by-state/"
+    url = "/api/v1/facilities/stats/by-state/"
 
     def test_returns_200(self, client, facility_set):
         r = client.get(self.url)
@@ -89,7 +89,7 @@ class TestFacilityStatsByAllStates:
 @pytest.mark.django_db
 class TestFacilityStatsByState:
     def url(self, state):
-        return f"/api/facilities/stats/by-state/{state}/"
+        return f"/api/v1/facilities/stats/by-state/{state}/"
     
     def test_returns_200_for_known_state(self, client, facility_set):
         r = client.get(self.url("Lagos"))
@@ -125,7 +125,7 @@ class TestFacilityStatsByState:
 @pytest.mark.django_db
 class TestFacilityStatsByStateOwnership:
     def url(self, state):
-        return f"/api/facilities/stats/by-state/{state}/ownership/"
+        return f"/api/v1/facilities/stats/by-state/{state}/ownership/"
 
     def test_returns_200(self, client, facility_set):
         assert client.get(self.url("Lagos")).status_code == 200
@@ -154,7 +154,7 @@ class TestFacilityStatsByStateOwnership:
 @pytest.mark.django_db
 class TestFacilityStatsByStateCareLevel:
     def url(self, state):
-        return f"/api/facilities/stats/by-state/{state}/care-level/"
+        return f"/api/v1/facilities/stats/by-state/{state}/care-level/"
 
     def test_returns_200(self, client, facility_set):
         assert client.get(self.url("Lagos")).status_code == 200
@@ -183,7 +183,7 @@ class TestFacilityStatsByStateCareLevel:
 
 @pytest.mark.django_db
 class TestFacilityStatsByAllLGAs:
-    url = "/api/facilities/stats/by-lga/"
+    url = "/api/v1/facilities/stats/by-lga/"
 
     def test_returns_200(self, client, facility_set):
         assert client.get(self.url).status_code == 200
@@ -216,7 +216,7 @@ class TestFacilityStatsByAllLGAs:
 @pytest.mark.django_db
 class TestFacilityStatsByLGA:
     def url(self, state, lga):
-        return f"/api/facilities/stats/by-state/{state}/lgas/{lga}/"
+        return f"/api/v1/facilities/stats/by-state/{state}/lgas/{lga}/"
 
     def test_returns_200_for_known_lga(self, client, facility_set):
         assert client.get(self.url("Lagos", "Ikeja")).status_code == 200

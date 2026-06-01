@@ -15,11 +15,11 @@ from apps.facilities.models import Facility, SARCProfile
 # Helpers
 # ---------------------------------------------------------------------------
 
-SARC_LIST_URL = '/api/facilities/sarcs/'
+SARC_LIST_URL = '/api/v1/facilities/sarcs/'
 
 
 def sarc_detail_url(pk):
-    return f'/api/facilities/sarcs/{pk}/'
+    return f'/api/v1/facilities/sarcs/{pk}/'
 
 
 def make_facility(name='Test SARC', facility_type='sarcs', has_sarcs=False, state='Lagos', is_active=True):

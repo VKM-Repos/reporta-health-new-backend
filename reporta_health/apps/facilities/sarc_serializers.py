@@ -45,5 +45,5 @@ class SARCFacilitySerializer(FacilityListSerializer):
             'is_standalone_sarc',
         )
 
-    def get_is_standalone_sarc(self, obj):
+    def get_is_standalone_sarc(self, obj) -> bool:
         return obj.facility_type == 'sarcs'

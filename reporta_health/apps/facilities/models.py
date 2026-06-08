@@ -23,6 +23,7 @@ class Facility(models.Model):
         ('dental', 'Dental Clinic'),
         ('eye', 'Eye Clinic'),
         ('physiotherapy', 'Physiotherapy Center'),
+        ('sarcs', 'Sexual Assault Referral Centre'),
         ('other', 'Other'),
     ]
     
@@ -67,6 +68,15 @@ class Facility(models.Model):
 
     # Basic Information
     name = models.CharField(_('facility name'), max_length=255, db_index=True)
+    
+   
+    sig_unique_id = models.CharField(
+            _('legacy unique ID'),
+            max_length=50,
+            blank=True,
+            db_index=True,
+            help_text=_('Reference ID from the legacy HFR system'),
+        )
     facility_type = models.CharField(
         _('facility type'),
         max_length=50,

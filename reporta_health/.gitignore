@@ -75,9 +75,5 @@ __pycache__/
 *.log
 logs/
 
-import_facilities.py
-import_gbv_services.py
-import_sarc.py
-import_fistula.py
-
+scripts/
 reporta_health_backup.dump

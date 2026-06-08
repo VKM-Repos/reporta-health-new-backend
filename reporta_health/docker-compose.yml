@@ -1,0 +1,105 @@
+version: '3.9'
+
+x-app-env: &app-env
+  DJANGO_SETTINGS_MODULE: config.settings.development
+  DB_HOST: db
+  DB_PORT: 5432
+  DB_NAME: ${DB_NAME:-reporta_health}
+  DB_USER: ${DB_USER:-postgres}
+  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  REDIS_URL: redis://redis:6379/0
+  SECRET_KEY: ${SECRET_KEY:-django-insecure-dev-key}
+  DEBUG: "True"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: reporta_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-reporta_health}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: reporta_redis
+    expose:
+      - "6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reporta_web
+    entrypoint: /entrypoint.sh
+    environment: *app-env
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reporta_celery
+    entrypoint: /entrypoint.celery.sh
+    command: celery -A config.celery worker --loglevel=info
+    environment: *app-env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reporta_celery_beat
+    entrypoint: /entrypoint.celery.sh
+    command: >
+      celery -A config.celery beat
+      --loglevel=info
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment: *app-env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

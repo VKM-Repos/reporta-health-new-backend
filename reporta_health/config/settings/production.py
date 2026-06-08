@@ -48,7 +48,10 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
         traces_sample_rate=0.1,
+        profile_session_sample_rate=0.1,
+        profile_lifecycle="trace",
         send_default_pii=False,
+        enable_logs=True,
         environment='production',
     )
 

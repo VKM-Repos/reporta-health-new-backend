@@ -4,6 +4,10 @@ Development-specific settings
 
 from .base import *
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from decouple import config
+
 DEBUG = True
 
 INSTALLED_APPS += [
@@ -26,3 +30,19 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
     'rest_framework.renderers.JSONRenderer',
     'rest_framework.renderers.BrowsableAPIRenderer',
 ]
+
+
+# Sentry Error Tracking (optional in development)
+
+SENTRY_DSN = config('SENTRY_DSN', default='')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        profile_session_sample_rate=1.0,
+        profile_lifecycle="trace",
+        send_default_pii=False,
+        enable_logs=True,
+        environment='development',
+    )

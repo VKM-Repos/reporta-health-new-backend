@@ -2,7 +2,7 @@
 Test settings for Reporta Health
 Inherits from base, overrides for fast isolated testing
 """
-
+import os
 from config.settings.base import *  # noqa
 
 # Use a separate test database
@@ -31,8 +31,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 # Use in-memory cache (no Redis dependency in tests)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',  # was LocMemCache
+
     }
+}
+
+
+
+# Disable all throttling in tests — rate limits have no place in a test suite
+REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    'DEFAULT_THROTTLE_CLASSES': [],
+    # 'DEFAULT_THROTTLE_RATES': {},
 }
 
 # Disable Celery — tasks run synchronously in tests
@@ -51,9 +61,16 @@ LOGGING = {
     },
 }
 
-# Use local file storage (no S3 in tests)
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+
 MEDIA_ROOT = '/tmp/reporta_test_media/'
 
 DEBUG = False
-SECRET_KEY = 'test-secret-key-not-for-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'test-secret-key-not-for-production')

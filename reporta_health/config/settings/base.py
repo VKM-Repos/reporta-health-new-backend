@@ -44,11 +44,13 @@ INSTALLED_APPS = [
     'apps.facilities',
     'apps.reviews',
     'apps.reports',
+    'apps.gbv',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS
+    'apps.core.middleware.RequestResponseLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,6 +144,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'PAGE_SIZE_QUERY_PARAM': 'page_size',  
+    'MAX_PAGE_SIZE': 100, 
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
@@ -279,6 +283,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+    },
+     'api': {                         
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+        'propagate': False,
     },
 }
 

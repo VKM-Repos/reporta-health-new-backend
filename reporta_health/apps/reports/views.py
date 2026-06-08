@@ -109,6 +109,24 @@ class ReportImageUploadView(generics.CreateAPIView):
         serializer.save(report=report)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        # 1. Check if report exists → 404
+        report = get_object_or_404(FacilityReport, id=report_id)
+
+        # 2. Check ownership → 403
+        if report.reporter != request.user:
+            raise PermissionDenied(
+                "You can only upload images to your own reports."
+            )
+
+        # 3. Now validate serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(report=report)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class UserReportsView(generics.ListAPIView):
     """
     Get reports submitted by current user
@@ -118,6 +136,8 @@ class UserReportsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return FacilityReport.objects.none()
         return FacilityReport.objects.filter(
             reporter=self.request.user
         ).select_related('facility').prefetch_related('images')

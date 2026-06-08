@@ -27,20 +27,23 @@ urlpatterns = [
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
 
-    path('api/auth/jwt/create/', ThrottledTokenObtainPairView.as_view(), name='jwt-create'),
-    path('api/auth/jwt/refresh/', ThrottledTokenRefreshView.as_view(), name='jwt-refresh'),
+    path('api/v1/auth/jwt/create/', ThrottledTokenObtainPairView.as_view(), name='jwt-create'),
+    path('api/v1/auth/jwt/refresh/', ThrottledTokenRefreshView.as_view(), name='jwt-refresh'),
+    path('api/v1/auth/', include('djoser.urls')),
+    path('api/v1/auth/', include('djoser.urls.jwt')),
 
-    # Authentication (Djoser)
+        # Authentication (Djoser)
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
     
     # App URLs
     path('api/', include(router.urls)),
-    path('api/users/', include('apps.users.urls')),
-    path('api/facilities/', include('apps.facilities.urls')),
-    path('api/reviews/', include('apps.reviews.urls')),
-    path('api/reports/', include('apps.reports.urls')),
-]
+    path('api/v1/users/',       include('apps.users.urls')),
+    path('api/v1/facilities/',  include('apps.facilities.urls')),
+    path('api/v1/reviews/',     include('apps.reviews.urls')),
+    path('api/v1/reports/',     include('apps.reports.urls')),
+    path('api/v1/gbv/', include('apps.gbv.urls')),
+    ]
 
 # Serve media files in development
 if settings.DEBUG:

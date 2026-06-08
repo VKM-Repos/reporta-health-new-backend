@@ -6,6 +6,8 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from django.contrib.gis.geos import Point
 from .models import Facility, FacilityImage
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 
 
 class FacilityImageSerializer(serializers.ModelSerializer):
@@ -44,12 +46,14 @@ class FacilityListSerializer(serializers.ModelSerializer):
             'primary_image',
         )
     
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_distance(self, obj):
         """Get distance from user location if available"""
         if hasattr(obj, 'distance'):
             return round(obj.distance.m, 2)  # Distance in meters
         return None
     
+    @extend_schema_field(OpenApiTypes.URI)
     def get_primary_image(self, obj):
         """Get primary image URL"""
         primary = obj.images.filter(is_primary=True).first()
@@ -59,6 +63,13 @@ class FacilityListSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(primary.image.url)
         return None
     
+    @extend_schema_field({
+        "type": "object",
+        "properties": {
+            "latitude": {"type": "number", "format": "float"},
+            "longitude": {"type": "number", "format": "float"},
+        }
+    })
     def get_location(self, obj):
         """Return location as lat/lng dict"""
         if obj.location:
@@ -108,12 +119,20 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('average_rating', 'total_reviews', 'created_at', 'updated_at')
     
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_distance(self, obj):
         """Get distance from user location if available"""
         if hasattr(obj, 'distance'):
             return round(obj.distance.m, 2)  # Distance in meters
         return None
     
+    @extend_schema_field({
+        "type": "object",
+        "properties": {
+            "latitude": {"type": "number", "format": "float"},
+            "longitude": {"type": "number", "format": "float"},
+        }
+    })
     def get_location(self, obj):
         """Return location as lat/lng dict"""
         if obj.location:
@@ -123,6 +142,7 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
             }
         return None
     
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_operating_hours(self, obj):
         """Return operating hours as structured dict"""
         return {
@@ -186,3 +206,52 @@ class FacilityCreateSerializer(serializers.ModelSerializer):
             validated_data['location'] = Point(longitude, latitude, srid=4326)
         
         return super().update(instance, validated_data)
+
+        # apps/facilities/serializers.py
+
+# ── Analytics serializers ────────────────────────────────────────────────────
+
+class FacilityTypeCountSerializer(serializers.Serializer):
+    """Single facility_type → count pair."""
+    facility_type       = serializers.CharField()
+    facility_type_label = serializers.CharField()
+    count               = serializers.IntegerField()
+
+
+class StateStatsSerializer(serializers.Serializer):
+    """Per-state breakdown by facility_type."""
+    state      = serializers.CharField()
+    total      = serializers.IntegerField()
+    breakdown  = FacilityTypeCountSerializer(many=True)
+
+
+class LGAStatsSerializer(serializers.Serializer):
+    """Per-LGA breakdown by facility_type."""
+    lga       = serializers.CharField()
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = FacilityTypeCountSerializer(many=True)
+
+
+class OwnershipCountSerializer(serializers.Serializer):
+    ownership       = serializers.CharField()
+    ownership_label = serializers.CharField()
+    count           = serializers.IntegerField()
+
+
+class CareLevelCountSerializer(serializers.Serializer):
+    care_level       = serializers.CharField()
+    care_level_label = serializers.CharField()
+    count            = serializers.IntegerField()
+
+
+class StateOwnershipStatsSerializer(serializers.Serializer):
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = OwnershipCountSerializer(many=True)
+
+
+class StateCareLevelStatsSerializer(serializers.Serializer):
+    state     = serializers.CharField()
+    total     = serializers.IntegerField()
+    breakdown = CareLevelCountSerializer(many=True)

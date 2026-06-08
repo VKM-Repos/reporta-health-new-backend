@@ -355,6 +355,17 @@ class FacilityStatsByLGAView(APIView):
     """
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        operation_id="facility_stats_single_lga",
+        tags=["Analytics"],
+        summary="Facility counts for a single LGA within a state",
+        parameters=[
+            OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="State name"),
+            OpenApiParameter("lga", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="LGA name"),
+        ],
+        responses={200: LGAStatsSerializer},
+    )
+
     def get(self, request, state: str, lga: str):
         state_name = state.strip()
         lga_name = lga.strip()
@@ -384,20 +395,22 @@ class FacilityStatsByLGAView(APIView):
         cache.set(cache_key, data, CACHE_TTL)
         return Response(data)
 
-@extend_schema(
-    operation_id="facility_stats_lgas_in_state",
-    tags=["Analytics"],
-    summary="Facility counts by LGA within a state",
-    parameters=[
-        OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="State name"),
-    ],
-    responses={200: LGAStatsSerializer(many=True)},
-)
+
 class FacilityStatsByLGAsInStateView(APIView):
     """
     GET /api/facilities/stats/by-state/<state>/lgas/
     """
     permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        operation_id="facility_stats_lgas_in_state",
+        tags=["Analytics"],
+        summary="Facility counts by LGA within a state",
+        parameters=[
+            OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.PATH, description="State name"),
+        ],
+        responses={200: LGAStatsSerializer(many=True)},
+    )
 
     def get(self, request, state: str):
         state_name = state.strip()

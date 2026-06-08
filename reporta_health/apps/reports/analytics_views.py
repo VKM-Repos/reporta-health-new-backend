@@ -10,6 +10,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers as drf_serializers
+from apps.facilities.models import Facility
 
 from .models import FacilityReport
 
@@ -27,6 +30,14 @@ class ReportStatsByReasonView(APIView):
     @extend_schema(
         tags=["Report Analytics"],
         summary="Report counts grouped by reason",
+        responses={200: inline_serializer(
+            name='ReportByReason',
+            fields={
+                'reason':       drf_serializers.CharField(),
+                'reason_label': drf_serializers.CharField(),
+                'count':        drf_serializers.IntegerField(),
+            }
+        )},
     )
     def get(self, request):
         cache_key = "stats:reports:by_reason"
@@ -63,6 +74,14 @@ class ReportStatsByFacilityTypeView(APIView):
     @extend_schema(
         tags=["Report Analytics"],
         summary="Report counts grouped by facility type",
+        responses={200: inline_serializer(
+            name='ReportByFacilityType',
+            fields={
+                'facility_type':       drf_serializers.CharField(),
+                'facility_type_label': drf_serializers.CharField(),
+                'count':               drf_serializers.IntegerField(),
+            }
+        )},
     )
     def get(self, request):
         cache_key = "stats:reports:by_facility_type"
@@ -77,7 +96,7 @@ class ReportStatsByFacilityTypeView(APIView):
             .order_by('-count')
         )
 
-        from apps.facilities.models import Facility
+        
         facility_type_map = dict(Facility.FACILITY_TYPES)
 
         data = [
@@ -104,6 +123,13 @@ class ReportStatsByStateView(APIView):
     @extend_schema(
         tags=["Report Analytics"],
         summary="Report counts grouped by state",
+        responses={200: inline_serializer(
+            name='ReportByState',
+            fields={
+                'state': drf_serializers.CharField(),
+                'count': drf_serializers.IntegerField(),
+            }
+        )},
     )
     def get(self, request):
         cache_key = "stats:reports:by_state"

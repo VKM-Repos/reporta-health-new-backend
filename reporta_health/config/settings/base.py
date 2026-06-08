@@ -15,7 +15,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
-ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,13 +32,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'django_filters',
-    'easy_thumbnails',
     'storages',
     'django_extensions',
     'djoser',
-    'leaflet',
     
     # Local apps
+    'apps.core',
     'apps.users',
     'apps.facilities',
     'apps.reviews',
@@ -290,19 +288,6 @@ LOGGING = {
     },
 }
 
-LEAFLET_CONFIG = {
-    'DEFAULT_CENTER': (6.5244, 3.3792),
-    'DEFAULT_ZOOM': 13,
-    'MIN_ZOOM': 3,
-    'MAX_ZOOM': 18,
-    'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    'ATTRIBUTION_PREFIX': '© OpenStreetMap contributors | © CARTO',
-    'EXTRA_SCRIPT': """
-        window.addEventListener('map:init', function(e) {
-            e.detail.map.locate({setView: true, maxZoom: 16});
-        });
-    """,
-}
 
 # Create logs directory if it doesn't exist
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)

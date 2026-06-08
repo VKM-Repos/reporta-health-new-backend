@@ -1,0 +1,4245 @@
+openapi: 3.0.3
+info:
+  title: Reporta Health API
+  version: 1.0.0
+  description: API for finding health facilities in Nigeria
+paths:
+  /api/auth/jwt/create/:
+    post:
+      operationId: auth_jwt_create_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/jwt/refresh/:
+    post:
+      operationId: auth_jwt_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/jwt/verify/:
+    post:
+      operationId: auth_jwt_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/auth/users/:
+    get:
+      operationId: auth_users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: auth_users_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreatePasswordRetype'
+          description: ''
+  /api/auth/users/{id}/:
+    get:
+      operationId: auth_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: auth_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/users/activation/:
+    post:
+      operationId: auth_users_activation_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activation'
+          description: ''
+  /api/auth/users/me/:
+    get:
+      operationId: auth_users_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: auth_users_me_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: auth_users_me_partial_update
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: auth_users_me_destroy
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/users/resend_activation/:
+    post:
+      operationId: auth_users_resend_activation_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/auth/users/reset_email/:
+    post:
+      operationId: auth_users_reset_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/auth/users/reset_email_confirm/:
+    post:
+      operationId: auth_users_reset_email_confirm_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameResetConfirm'
+          description: ''
+  /api/auth/users/reset_password/:
+    post:
+      operationId: auth_users_reset_password_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/auth/users/reset_password_confirm/:
+    post:
+      operationId: auth_users_reset_password_confirm_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetConfirmRetype'
+          description: ''
+  /api/auth/users/set_email/:
+    post:
+      operationId: auth_users_set_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetUsername'
+          description: ''
+  /api/auth/users/set_password/:
+    post:
+      operationId: auth_users_set_password_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetPasswordRetype'
+          description: ''
+  /api/v1/auth/jwt/create/:
+    post:
+      operationId: v1_auth_jwt_create_create
+      description: JWT login with rate limiting.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/jwt/refresh/:
+    post:
+      operationId: v1_auth_jwt_refresh_create
+      description: JWT refresh with rate limiting.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/jwt/verify/:
+    post:
+      operationId: v1_auth_jwt_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/users/:
+    get:
+      operationId: v1_auth_users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: v1_auth_users_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreatePasswordRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreatePasswordRetype'
+          description: ''
+  /api/v1/auth/users/{id}/:
+    get:
+      operationId: v1_auth_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_auth_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_auth_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: v1_auth_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/users/activation/:
+    post:
+      operationId: v1_auth_users_activation_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActivationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activation'
+          description: ''
+  /api/v1/auth/users/me/:
+    get:
+      operationId: v1_auth_users_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_auth_users_me_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_auth_users_me_partial_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: v1_auth_users_me_destroy
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/users/resend_activation/:
+    post:
+      operationId: v1_auth_users_resend_activation_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/v1/auth/users/reset_email/:
+    post:
+      operationId: v1_auth_users_reset_email_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/v1/auth/users/reset_email_confirm/:
+    post:
+      operationId: v1_auth_users_reset_email_confirm_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirmRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameResetConfirm'
+          description: ''
+  /api/v1/auth/users/reset_password/:
+    post:
+      operationId: v1_auth_users_reset_password_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailResetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/v1/auth/users/reset_password_confirm/:
+    post:
+      operationId: v1_auth_users_reset_password_confirm_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetConfirmRetype'
+          description: ''
+  /api/v1/auth/users/set_email/:
+    post:
+      operationId: v1_auth_users_set_email_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetUsernameRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetUsername'
+          description: ''
+  /api/v1/auth/users/set_password/:
+    post:
+      operationId: v1_auth_users_set_password_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetPasswordRetypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetPasswordRetype'
+          description: ''
+  /api/v1/facilities/:
+    get:
+      operationId: v1_facilities_list
+      description: |-
+        List all facilities with filtering and search
+        GET /api/facilities/
+
+        Query parameters:
+        - facility_type: Filter by type (hospital, clinic, etc.)
+        - search: Search by name
+        - ordering: Order by field (e.g., -average_rating, name)
+        - is_verified: Filter by verified status
+      parameters:
+      - in: query
+        name: care_level
+        schema:
+          type: string
+          enum:
+          - other
+          - primary
+          - secondary
+          - tertiary
+        description: |-
+          * `primary` - Primary
+          * `secondary` - Secondary
+          * `tertiary` - Tertiary
+          * `other` - Other
+      - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: city__icontains
+        schema:
+          type: string
+      - in: query
+        name: facility_type
+        schema:
+          type: string
+          enum:
+          - clinic
+          - dental
+          - diagnostic
+          - eye
+          - hospital
+          - laboratory
+          - maternity
+          - other
+          - pharmacy
+          - physiotherapy
+        description: |-
+          * `hospital` - Hospital
+          * `clinic` - Clinic
+          * `pharmacy` - Pharmacy
+          * `laboratory` - Laboratory
+          * `diagnostic` - Diagnostic Center
+          * `maternity` - Maternity Home
+          * `dental` - Dental Clinic
+          * `eye` - Eye Clinic
+          * `physiotherapy` - Physiotherapy Center
+          * `other` - Other
+      - in: query
+        name: has_emergency_service
+        schema:
+          type: boolean
+      - in: query
+        name: has_parking
+        schema:
+          type: boolean
+      - in: query
+        name: has_wheelchair_access
+        schema:
+          type: boolean
+      - in: query
+        name: is_verified
+        schema:
+          type: boolean
+      - in: query
+        name: lga
+        schema:
+          type: string
+      - in: query
+        name: lga__icontains
+        schema:
+          type: string
+      - in: query
+        name: max_lat
+        schema:
+          type: number
+      - in: query
+        name: max_lng
+        schema:
+          type: number
+      - in: query
+        name: max_rating
+        schema:
+          type: number
+      - in: query
+        name: min_lat
+        schema:
+          type: number
+      - in: query
+        name: min_lng
+        schema:
+          type: number
+      - in: query
+        name: min_rating
+        schema:
+          type: number
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: ownership
+        schema:
+          type: string
+          title: Ownership type
+          enum:
+          - federal_government
+          - lga
+          - mission
+          - ngo
+          - other
+          - private
+          - state_government
+        description: |-
+          * `federal_government` - Federal Government
+          * `state_government` - State Government
+          * `lga` - Local Government (LGA)
+          * `private` - Private
+          * `mission` - Mission/Faith-based
+          * `ngo` - NGO
+          * `other` - Other
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: state
+        schema:
+          type: string
+      - in: query
+        name: state__icontains
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFacilityListList'
+          description: ''
+  /api/v1/facilities/{facility_id}/images/:
+    post:
+      operationId: v1_facilities_images_create
+      description: |-
+        Upload image for a facility
+        POST /api/facilities/:facility_id/images/
+      parameters:
+      - in: path
+        name: facility_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacilityImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FacilityImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FacilityImageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityImage'
+          description: ''
+  /api/v1/facilities/{facility_id}/reviews/:
+    get:
+      operationId: v1_facilities_reviews_list
+      description: |-
+        Get reviews for a specific facility
+        GET /api/facilities/:facility_id/reviews/
+      parameters:
+      - in: path
+        name: facility_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: rating
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+  /api/v1/facilities/{facility_id}/reviews/create/:
+    post:
+      operationId: v1_facilities_reviews_create_create
+      description: |-
+        Create a review for a facility
+        POST /api/facilities/:facility_id/reviews/
+      parameters:
+      - in: path
+        name: facility_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCreate'
+          description: ''
+  /api/v1/facilities/{id}/:
+    get:
+      operationId: v1_facilities_retrieve
+      description: |-
+        Get facility details
+        GET /api/facilities/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityDetail'
+          description: ''
+  /api/v1/facilities/{id}/delete/:
+    delete:
+      operationId: v1_facilities_delete_destroy
+      description: |-
+        Delete facility (admin only)
+        DELETE /api/facilities/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/facilities/{id}/update/:
+    put:
+      operationId: v1_facilities_update_update
+      description: |-
+        Update facility (admin only)
+        PUT/PATCH /api/facilities/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityCreate'
+          description: ''
+    patch:
+      operationId: v1_facilities_update_partial_update
+      description: |-
+        Update facility (admin only)
+        PUT/PATCH /api/facilities/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFacilityCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFacilityCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFacilityCreateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityCreate'
+          description: ''
+  /api/v1/facilities/clusters/:
+    get:
+      operationId: v1_facilities_clusters_retrieve
+      description: 'Nearby mode (lat+lng): returns individual pins ordered by distance.
+        Browse mode (bbox+zoom): returns state clusters at low zoom, LGA clusters
+        at mid zoom, individual pins at zoom 12+.'
+      summary: Facility clusters for map display
+      parameters:
+      - in: query
+        name: bbox
+        schema:
+          type: string
+        description: min_lng,min_lat,max_lng,max_lat
+      - in: query
+        name: facility_type
+        schema:
+          type: string
+      - in: query
+        name: has_fistula_programme
+        schema:
+          type: boolean
+      - in: query
+        name: has_sarcs
+        schema:
+          type: boolean
+      - in: query
+        name: is_verified
+        schema:
+          type: boolean
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: float
+        description: User latitude (nearby mode)
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: float
+        description: User longitude (nearby mode)
+      - in: query
+        name: radius_km
+        schema:
+          type: number
+          format: float
+        description: Search radius in km (default 10, nearby mode only)
+      - in: query
+        name: state
+        schema:
+          type: string
+      - in: query
+        name: zoom
+        schema:
+          type: integer
+        description: Map zoom level 1–20
+      tags:
+      - Map
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/facilities/create/:
+    post:
+      operationId: v1_facilities_create_create
+      description: |-
+        Create a new facility (admin only)
+        POST /api/facilities/
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FacilityCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityCreate'
+          description: ''
+  /api/v1/facilities/nearby/:
+    get:
+      operationId: v1_facilities_nearby_list
+      description: Get facilities near a specific location
+      parameters:
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: float
+        description: Latitude
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Max results
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: float
+        description: Longitude
+        required: true
+      - in: query
+        name: radius
+        schema:
+          type: integer
+        description: Search radius in meters
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FacilityList'
+          description: ''
+  /api/v1/facilities/sarcs/:
+    get:
+      operationId: v1_facilities_sarcs_list
+      description: Returns standalone Sexual Assault Referral Centres and hospitals
+        that have a SARC unit. Optionally filter by proximity.
+      summary: List all SARC facilities
+      parameters:
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: float
+        description: Latitude for nearby search
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: float
+        description: Longitude for nearby search
+      - in: query
+        name: radius
+        schema:
+          type: integer
+        description: Search radius in metres (default 10000, max 50000)
+      - in: query
+        name: service
+        schema:
+          type: string
+        description: 'Filter by service. Valid values: legal_aid, counseling, hiv_pep,
+          police_support, emergency_contraception, shelter_referral, forensic, sti_testing,
+          court_support'
+      - in: query
+        name: state
+        schema:
+          type: string
+        description: Filter by state name
+      tags:
+      - SARC
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SARCFacility'
+          description: ''
+  /api/v1/facilities/sarcs/{id}/:
+    get:
+      operationId: v1_facilities_sarcs_retrieve
+      description: |-
+        GET /api/facilities/sarcs/<int:pk>/
+        Get full SARC facility detail including profile.
+      summary: Get SARC facility detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - SARC
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SARCFacility'
+          description: ''
+  /api/v1/facilities/states/:
+    get:
+      operationId: v1_facilities_states_retrieve
+      description: |-
+        List all distinct states that have active facilities
+        GET /api/facilities/states/
+      summary: List all states with active facilities
+      tags:
+      - Facilities
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityState'
+          description: ''
+  /api/v1/facilities/stats/by-lga/:
+    get:
+      operationId: v1_facilities_stats_by_lga_list
+      description: Returns total and per-facility-type breakdown for every LGA. Each
+        entry includes the parent state name.  Cached for 15 minutes.
+      summary: Facility counts across all LGAs
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LGAStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/:
+    get:
+      operationId: v1_facilities_stats_by_state_list
+      description: Returns total facility count and per-facility-type breakdown for
+        every state.  Results are cached for 15 minutes.
+      summary: Facility counts across all states
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StateStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/{state}/:
+    get:
+      operationId: v1_facilities_stats_by_state_retrieve
+      description: Returns total and per-facility-type breakdown for the given state
+        name.
+      summary: Facility counts for a single state
+      parameters:
+      - in: path
+        name: state
+        schema:
+          type: string
+        description: State name (e.g. Lagos, Abuja)
+        required: true
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/{state}/care-level/:
+    get:
+      operationId: v1_facilities_stats_by_state_care_level_retrieve
+      description: GET /api/facilities/stats/by-state/<state>/care-level/
+      summary: Facility counts by care level for a state
+      parameters:
+      - in: path
+        name: state
+        schema:
+          type: string
+        description: State name
+        required: true
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateCareLevelStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/{state}/lgas/:
+    get:
+      operationId: facility_stats_lgas_in_state
+      description: GET /api/facilities/stats/by-state/<state>/lgas/
+      summary: Facility counts by LGA within a state
+      parameters:
+      - in: path
+        name: state
+        schema:
+          type: string
+        description: State name
+        required: true
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LGAStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/{state}/lgas/{lga}/:
+    get:
+      operationId: facility_stats_single_lga
+      description: GET /api/facilities/stats/by-state/<state>/lgas/<lga>/
+      summary: Facility counts for a single LGA within a state
+      parameters:
+      - in: path
+        name: lga
+        schema:
+          type: string
+        description: LGA name
+        required: true
+      - in: path
+        name: state
+        schema:
+          type: string
+        description: State name
+        required: true
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LGAStats'
+          description: ''
+  /api/v1/facilities/stats/by-state/{state}/ownership/:
+    get:
+      operationId: v1_facilities_stats_by_state_ownership_retrieve
+      description: GET /api/facilities/stats/by-state/<state>/ownership/
+      summary: Facility counts by ownership type for a state
+      parameters:
+      - in: path
+        name: state
+        schema:
+          type: string
+        description: State name
+        required: true
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateOwnershipStats'
+          description: ''
+  /api/v1/facilities/types/:
+    get:
+      operationId: v1_facilities_types_retrieve
+      description: |-
+        List all facility type choices
+        GET /api/facilities/types/
+      summary: List all facility type choices
+      tags:
+      - Facilities
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityType'
+          description: ''
+  /api/v1/gbv/nearby/:
+    get:
+      operationId: v1_gbv_nearby_retrieve
+      description: |-
+        GET /api/v1/gbv/nearby/?lat=&lng=&radius_km=
+        Returns both SARC facilities and GBV services ordered by distance.
+        This is the endpoint for the Report Now button.
+      summary: Nearby GBV help — combined SARCs and services
+      parameters:
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: float
+        required: true
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: float
+        required: true
+      - in: query
+        name: radius_km
+        schema:
+          type: number
+          format: float
+      tags:
+      - GBV
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/gbv/services/:
+    get:
+      operationId: v1_gbv_services_list
+      description: |-
+        GET /api/v1/gbv/services/
+        List all GBV services with optional filtering.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGBVServiceList'
+          description: ''
+  /api/v1/gbv/services/nearby/:
+    get:
+      operationId: v1_gbv_services_nearby_list
+      description: |-
+        GET /api/v1/gbv/services/nearby/?lat=&lng=&radius_km=
+        GBV services ordered by distance from user.
+      summary: Nearby GBV services
+      parameters:
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: float
+        required: true
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: float
+        required: true
+      - in: query
+        name: radius_km
+        schema:
+          type: number
+          format: float
+      - in: query
+        name: state
+        schema:
+          type: string
+      tags:
+      - GBV
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GBVService'
+          description: ''
+  /api/v1/reports/:
+    get:
+      operationId: v1_reports_list
+      description: |-
+        List all reports (admin only)
+        GET /api/reports/
+
+        Query parameters:
+        - status: Filter by status (pending, investigating, resolved, rejected)
+        - facility: Filter by facility ID
+      parameters:
+      - in: query
+        name: facility
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: reason
+        schema:
+          type: string
+          enum:
+          - closed
+          - duplicate
+          - fake
+          - inappropriate
+          - other
+          - spam
+          - wrong_info
+        description: |-
+          * `fake` - Fake Facility
+          * `closed` - Permanently Closed
+          * `wrong_info` - Wrong Information
+          * `inappropriate` - Inappropriate Content
+          * `duplicate` - Duplicate Entry
+          * `spam` - Spam
+          * `other` - Other
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - investigating
+          - pending
+          - rejected
+          - resolved
+        description: |-
+          * `pending` - Pending Review
+          * `investigating` - Under Investigation
+          * `resolved` - Resolved
+          * `rejected` - Rejected
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFacilityReportList'
+          description: ''
+  /api/v1/reports/{id}/:
+    get:
+      operationId: v1_reports_retrieve
+      description: |-
+        Get report details (admin only)
+        GET /api/reports/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilityReport'
+          description: ''
+  /api/v1/reports/{id}/status/:
+    put:
+      operationId: v1_reports_status_update
+      description: |-
+        Update report status (admin only)
+        PATCH /api/reports/:id/status/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportStatusUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportStatusUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportStatusUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatusUpdate'
+          description: ''
+    patch:
+      operationId: v1_reports_status_partial_update
+      description: |-
+        Update report status (admin only)
+        PATCH /api/reports/:id/status/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReportStatusUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReportStatusUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReportStatusUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportStatusUpdate'
+          description: ''
+  /api/v1/reports/{report_id}/images/:
+    post:
+      operationId: v1_reports_images_create
+      parameters:
+      - in: path
+        name: report_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportImageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportImage'
+          description: ''
+  /api/v1/reports/create/:
+    post:
+      operationId: v1_reports_create_create
+      description: |-
+        Submit a report for a facility
+        POST /api/reports/
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportCreate'
+          description: ''
+  /api/v1/reports/my-reports/:
+    get:
+      operationId: v1_reports_my_reports_list
+      description: |-
+        Get reports submitted by current user
+        GET /api/reports/my-reports/
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFacilityReportList'
+          description: ''
+  /api/v1/reports/stats/by-facility-type/:
+    get:
+      operationId: v1_reports_stats_by_facility_type_retrieve
+      description: GET /api/reports/stats/by-facility-type/
+      summary: Report counts grouped by facility type
+      tags:
+      - Report Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reports/stats/by-reason/:
+    get:
+      operationId: v1_reports_stats_by_reason_retrieve
+      description: GET /api/reports/stats/by-reason/
+      summary: Report counts grouped by reason
+      tags:
+      - Report Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reports/stats/by-state/:
+    get:
+      operationId: v1_reports_stats_by_state_retrieve
+      description: GET /api/reports/stats/by-state/
+      summary: Report counts grouped by state
+      tags:
+      - Report Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/reviews/{id}/:
+    get:
+      operationId: v1_reviews_retrieve
+      description: |-
+        Get review details
+        GET /api/reviews/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+          description: ''
+  /api/v1/reviews/{id}/delete/:
+    delete:
+      operationId: v1_reviews_delete_destroy
+      description: |-
+        Delete own review
+        DELETE /api/reviews/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/reviews/{id}/update/:
+    put:
+      operationId: v1_reviews_update_update
+      description: |-
+        Update own review
+        PUT/PATCH /api/reviews/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCreate'
+          description: ''
+    patch:
+      operationId: v1_reviews_update_partial_update
+      description: |-
+        Update own review
+        PUT/PATCH /api/reviews/:id/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReviewCreateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCreate'
+          description: ''
+  /api/v1/reviews/{review_id}/images/:
+    post:
+      operationId: v1_reviews_images_create
+      description: |-
+        Upload image for a review
+        POST /api/reviews/:review_id/images/
+      parameters:
+      - in: path
+        name: review_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewImageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReviewImageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReviewImageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewImage'
+          description: ''
+  /api/v1/users/me/:
+    get:
+      operationId: v1_users_me_retrieve
+      description: |-
+        Get or update current authenticated user profile
+        GET /api/users/me/
+        PUT/PATCH /api/users/me/
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_users_me_update
+      description: |-
+        Get or update current authenticated user profile
+        GET /api/users/me/
+        PUT/PATCH /api/users/me/
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+          description: ''
+    patch:
+      operationId: v1_users_me_partial_update
+      description: |-
+        Get or update current authenticated user profile
+        GET /api/users/me/
+        PUT/PATCH /api/users/me/
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+          description: ''
+  /api/v1/users/me/reviews/:
+    get:
+      operationId: v1_users_me_reviews_list
+      description: |-
+        Get reviews submitted by current user
+        GET /api/users/me/reviews/
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+components:
+  schemas:
+    Activation:
+      type: object
+      properties:
+        uid:
+          type: string
+        token:
+          type: string
+      required:
+      - token
+      - uid
+    ActivationRequest:
+      type: object
+      properties:
+        uid:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
+      - uid
+    CareLevelCount:
+      type: object
+      properties:
+        care_level:
+          type: string
+        care_level_label:
+          type: string
+        count:
+          type: integer
+      required:
+      - care_level
+      - care_level_label
+      - count
+    FacilityCreate:
+      type: object
+      description: Serializer for creating a facility
+      properties:
+        name:
+          type: string
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        phone_number:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        description:
+          type: string
+        services:
+          type: string
+          title: Services offered
+          description: Comma-separated list of services
+        monday_hours:
+          type: string
+          maxLength: 50
+        tuesday_hours:
+          type: string
+          maxLength: 50
+        wednesday_hours:
+          type: string
+          maxLength: 50
+        thursday_hours:
+          type: string
+          maxLength: 50
+        friday_hours:
+          type: string
+          maxLength: 50
+        saturday_hours:
+          type: string
+          maxLength: 50
+        sunday_hours:
+          type: string
+          maxLength: 50
+        has_parking:
+          type: boolean
+        has_wheelchair_access:
+          type: boolean
+          title: Wheelchair accessible
+        has_emergency_service:
+          type: boolean
+      required:
+      - address
+      - facility_type
+      - name
+    FacilityCreateRequest:
+      type: object
+      description: Serializer for creating a facility
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        phone_number:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        description:
+          type: string
+        services:
+          type: string
+          title: Services offered
+          description: Comma-separated list of services
+        monday_hours:
+          type: string
+          maxLength: 50
+        tuesday_hours:
+          type: string
+          maxLength: 50
+        wednesday_hours:
+          type: string
+          maxLength: 50
+        thursday_hours:
+          type: string
+          maxLength: 50
+        friday_hours:
+          type: string
+          maxLength: 50
+        saturday_hours:
+          type: string
+          maxLength: 50
+        sunday_hours:
+          type: string
+          maxLength: 50
+        has_parking:
+          type: boolean
+        has_wheelchair_access:
+          type: boolean
+          title: Wheelchair accessible
+        has_emergency_service:
+          type: boolean
+      required:
+      - address
+      - facility_type
+      - latitude
+      - longitude
+      - name
+    FacilityDetail:
+      type: object
+      description: Detailed serializer for single facility view
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        description:
+          type: string
+        services:
+          type: string
+          title: Services offered
+          description: Comma-separated list of services
+        operating_hours:
+          type: object
+          additionalProperties: {}
+          description: Return operating hours as structured dict
+          readOnly: true
+        has_parking:
+          type: boolean
+        has_wheelchair_access:
+          type: boolean
+          title: Wheelchair accessible
+        has_emergency_service:
+          type: boolean
+        is_verified:
+          type: boolean
+          title: Verified
+          description: Has this facility been verified by admin?
+        is_active:
+          type: boolean
+          title: Active
+          description: Is this facility currently operational?
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+        total_reviews:
+          type: integer
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityImage'
+          readOnly: true
+        distance:
+          type: number
+          format: float
+          description: Get distance from user location if available
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - average_rating
+      - created_at
+      - distance
+      - facility_type
+      - id
+      - images
+      - location
+      - name
+      - operating_hours
+      - total_reviews
+      - updated_at
+    FacilityImage:
+      type: object
+      description: Serializer for facility images
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        caption:
+          type: string
+          maxLength: 255
+        is_primary:
+          type: boolean
+          title: Primary image
+          description: Is this the main image for the facility?
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - image
+      - uploaded_at
+    FacilityImageRequest:
+      type: object
+      description: Serializer for facility images
+      properties:
+        image:
+          type: string
+          format: binary
+        caption:
+          type: string
+          maxLength: 255
+        is_primary:
+          type: boolean
+          title: Primary image
+          description: Is this the main image for the facility?
+      required:
+      - image
+    FacilityList:
+      type: object
+      description: Serializer for facility list view (lightweight)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 20
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        total_reviews:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        is_verified:
+          type: boolean
+          title: Verified
+          description: Has this facility been verified by admin?
+        distance:
+          type: number
+          format: float
+          description: Get distance from user location if available
+          readOnly: true
+        primary_image:
+          type: string
+          format: uri
+          description: Get primary image URL
+          readOnly: true
+      required:
+      - address
+      - distance
+      - facility_type
+      - id
+      - location
+      - name
+      - primary_image
+    FacilityReport:
+      type: object
+      description: Serializer for facility reports
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        facility:
+          type: integer
+        facility_name:
+          type: string
+          readOnly: true
+        reporter:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        reason_display:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          description: Detailed explanation of the issue
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        admin_notes:
+          type: string
+          readOnly: true
+          description: Internal notes for admins
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportImage'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Reported at
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resolved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - admin_notes
+      - created_at
+      - description
+      - facility
+      - facility_name
+      - id
+      - images
+      - reason
+      - reason_display
+      - reporter
+      - resolved_at
+      - status
+      - status_display
+      - updated_at
+    FacilityState:
+      type: object
+      properties:
+        states:
+          type: array
+          items:
+            type: string
+      required:
+      - states
+    FacilityType:
+      type: object
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+      required:
+      - label
+      - value
+    FacilityTypeCount:
+      type: object
+      description: Single facility_type → count pair.
+      properties:
+        facility_type:
+          type: string
+        facility_type_label:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - facility_type
+      - facility_type_label
+    FacilityTypeEnum:
+      enum:
+      - hospital
+      - clinic
+      - pharmacy
+      - laboratory
+      - diagnostic
+      - maternity
+      - dental
+      - eye
+      - physiotherapy
+      - other
+      type: string
+      description: |-
+        * `hospital` - Hospital
+        * `clinic` - Clinic
+        * `pharmacy` - Pharmacy
+        * `laboratory` - Laboratory
+        * `diagnostic` - Diagnostic Center
+        * `maternity` - Maternity Home
+        * `dental` - Dental Clinic
+        * `eye` - Eye Clinic
+        * `physiotherapy` - Physiotherapy Center
+        * `other` - Other
+    GBVService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        state:
+          type: string
+          maxLength: 100
+        lga:
+          type: string
+          maxLength: 100
+        organisation_type:
+          $ref: '#/components/schemas/OrganisationTypeEnum'
+        services:
+          type: string
+          title: Services offered
+        target_group:
+          $ref: '#/components/schemas/TargetGroupEnum'
+        address:
+          type: string
+        phone_number:
+          type: string
+          maxLength: 100
+        contact_person:
+          type: string
+          maxLength: 255
+        accessibility_info:
+          type: string
+        operating_hours:
+          type: string
+          maxLength: 100
+        location:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+          title: Active
+        distance:
+          type: string
+          readOnly: true
+      required:
+      - distance
+      - id
+      - name
+      - state
+    LGAStats:
+      type: object
+      description: Per-LGA breakdown by facility_type.
+      properties:
+        lga:
+          type: string
+        state:
+          type: string
+        total:
+          type: integer
+        breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityTypeCount'
+      required:
+      - breakdown
+      - lga
+      - state
+      - total
+    OrganisationTypeEnum:
+      enum:
+      - governmental
+      - national_ngo
+      - international_ngo
+      - private
+      - other
+      type: string
+      description: |-
+        * `governmental` - Governmental
+        * `national_ngo` - National NGO
+        * `international_ngo` - International NGO
+        * `private` - Private
+        * `other` - Other
+    OwnershipCount:
+      type: object
+      properties:
+        ownership:
+          type: string
+        ownership_label:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - ownership
+      - ownership_label
+    PaginatedFacilityListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityList'
+    PaginatedFacilityReportList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityReport'
+    PaginatedGBVServiceList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GBVService'
+    PaginatedReviewList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+    PaginatedUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PasswordResetConfirmRetype:
+      type: object
+      properties:
+        uid:
+          type: string
+        token:
+          type: string
+        new_password:
+          type: string
+        re_new_password:
+          type: string
+      required:
+      - new_password
+      - re_new_password
+      - token
+      - uid
+    PasswordResetConfirmRetypeRequest:
+      type: object
+      properties:
+        uid:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          minLength: 1
+        re_new_password:
+          type: string
+          minLength: 1
+      required:
+      - new_password
+      - re_new_password
+      - token
+      - uid
+    PatchedFacilityCreateRequest:
+      type: object
+      description: Serializer for creating a facility
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        phone_number:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        website:
+          type: string
+          format: uri
+          maxLength: 200
+        description:
+          type: string
+        services:
+          type: string
+          title: Services offered
+          description: Comma-separated list of services
+        monday_hours:
+          type: string
+          maxLength: 50
+        tuesday_hours:
+          type: string
+          maxLength: 50
+        wednesday_hours:
+          type: string
+          maxLength: 50
+        thursday_hours:
+          type: string
+          maxLength: 50
+        friday_hours:
+          type: string
+          maxLength: 50
+        saturday_hours:
+          type: string
+          maxLength: 50
+        sunday_hours:
+          type: string
+          maxLength: 50
+        has_parking:
+          type: boolean
+        has_wheelchair_access:
+          type: boolean
+          title: Wheelchair accessible
+        has_emergency_service:
+          type: boolean
+    PatchedReportStatusUpdateRequest:
+      type: object
+      description: Serializer for updating report status (admin only)
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        admin_notes:
+          type: string
+          description: Internal notes for admins
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedReviewCreateRequest:
+      type: object
+      description: Simplified serializer for creating reviews
+      properties:
+        facility:
+          type: integer
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+          description: Rating from 1 to 5 stars
+        body:
+          type: string
+          minLength: 1
+          title: Review text
+        is_anonymous:
+          type: boolean
+          title: Anonymous
+        visit_date:
+          type: string
+          format: date
+          nullable: true
+    PatchedUserRequest:
+      type: object
+      description: Serializer for user profile
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+    PatchedUserUpdateRequest:
+      type: object
+      description: Serializer for updating user profile
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+    PublicUser:
+      type: object
+      description: Serializer for public user information (shown in reviews, etc.)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - full_name
+      - id
+    ReasonEnum:
+      enum:
+      - fake
+      - closed
+      - wrong_info
+      - inappropriate
+      - duplicate
+      - spam
+      - other
+      type: string
+      description: |-
+        * `fake` - Fake Facility
+        * `closed` - Permanently Closed
+        * `wrong_info` - Wrong Information
+        * `inappropriate` - Inappropriate Content
+        * `duplicate` - Duplicate Entry
+        * `spam` - Spam
+        * `other` - Other
+    ReportCreate:
+      type: object
+      description: Simplified serializer for creating reports
+      properties:
+        facility:
+          type: integer
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        description:
+          type: string
+          description: Detailed explanation of the issue
+      required:
+      - description
+      - facility
+      - reason
+    ReportCreateRequest:
+      type: object
+      description: Simplified serializer for creating reports
+      properties:
+        facility:
+          type: integer
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        description:
+          type: string
+          minLength: 1
+          description: Detailed explanation of the issue
+      required:
+      - description
+      - facility
+      - reason
+    ReportImage:
+      type: object
+      description: Serializer for report images
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        caption:
+          type: string
+          maxLength: 255
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - image
+      - uploaded_at
+    ReportImageRequest:
+      type: object
+      description: Serializer for report images
+      properties:
+        image:
+          type: string
+          format: binary
+        caption:
+          type: string
+          maxLength: 255
+      required:
+      - image
+    ReportStatusUpdate:
+      type: object
+      description: Serializer for updating report status (admin only)
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        admin_notes:
+          type: string
+          description: Internal notes for admins
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+    ReportStatusUpdateRequest:
+      type: object
+      description: Serializer for updating report status (admin only)
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        admin_notes:
+          type: string
+          description: Internal notes for admins
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+    Review:
+      type: object
+      description: Serializer for reviews with user info
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        facility:
+          type: integer
+        facility_name:
+          type: string
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+          description: Rating from 1 to 5 stars
+        body:
+          type: string
+          title: Review text
+        is_anonymous:
+          type: boolean
+          title: Anonymous
+        is_published:
+          type: boolean
+          readOnly: true
+          title: Published
+        flag_count:
+          type: integer
+          readOnly: true
+        visit_date:
+          type: string
+          format: date
+          nullable: true
+        is_verified:
+          type: boolean
+          readOnly: true
+          title: Verified
+          description: Has admin verified this review?
+        helpful_count:
+          type: integer
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewImage'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - facility
+      - facility_name
+      - flag_count
+      - helpful_count
+      - id
+      - images
+      - is_published
+      - is_verified
+      - rating
+      - updated_at
+      - user
+    ReviewCreate:
+      type: object
+      description: Simplified serializer for creating reviews
+      properties:
+        facility:
+          type: integer
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+          description: Rating from 1 to 5 stars
+        body:
+          type: string
+          title: Review text
+        is_anonymous:
+          type: boolean
+          title: Anonymous
+        visit_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - body
+      - facility
+      - rating
+    ReviewCreateRequest:
+      type: object
+      description: Simplified serializer for creating reviews
+      properties:
+        facility:
+          type: integer
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+          description: Rating from 1 to 5 stars
+        body:
+          type: string
+          minLength: 1
+          title: Review text
+        is_anonymous:
+          type: boolean
+          title: Anonymous
+        visit_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - body
+      - facility
+      - rating
+    ReviewImage:
+      type: object
+      description: Serializer for review images
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        caption:
+          type: string
+          maxLength: 255
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - image
+      - uploaded_at
+    ReviewImageRequest:
+      type: object
+      description: Serializer for review images
+      properties:
+        image:
+          type: string
+          format: binary
+        caption:
+          type: string
+          maxLength: 255
+      required:
+      - image
+    SARCFacility:
+      type: object
+      description: |-
+        Facility serializer with nested SARC profile.
+        Extends the list serializer so distance works for nearby queries.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Facility name
+          maxLength: 255
+        facility_type:
+          $ref: '#/components/schemas/FacilityTypeEnum'
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 20
+        average_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        total_reviews:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        is_verified:
+          type: boolean
+          title: Verified
+          description: Has this facility been verified by admin?
+        distance:
+          type: number
+          format: float
+          description: Get distance from user location if available
+          readOnly: true
+        primary_image:
+          type: string
+          format: uri
+          description: Get primary image URL
+          readOnly: true
+        has_sarcs:
+          type: boolean
+          title: Has SARC
+          description: Does this facility have a Sexual Assault Referral Centre unit?
+        sarc_profile:
+          allOf:
+          - $ref: '#/components/schemas/SARCProfile'
+          readOnly: true
+        is_standalone_sarc:
+          type: string
+          readOnly: true
+      required:
+      - address
+      - distance
+      - facility_type
+      - id
+      - is_standalone_sarc
+      - location
+      - name
+      - primary_image
+      - sarc_profile
+    SARCProfile:
+      type: object
+      properties:
+        unit_name:
+          type: string
+          title: SARC unit name
+          description: Name of the SARC unit e.g. Hope Centre
+          maxLength: 255
+        hotline_number:
+          type: string
+          description: 24/7 crisis hotline number
+          maxLength: 20
+        is_24_hours:
+          type: boolean
+          title: 24 hour service
+        accepts_walk_ins:
+          type: boolean
+        confidentiality_assured:
+          type: boolean
+        has_police_presence:
+          type: boolean
+        has_legal_aid:
+          type: boolean
+        has_counseling:
+          type: boolean
+        has_hiv_pep:
+          type: boolean
+        has_emergency_contraception:
+          type: boolean
+        has_shelter_referral:
+          type: boolean
+        has_forensic:
+          type: boolean
+          title: Has forensic examination
+        has_sti_testing:
+          type: boolean
+        has_court_support:
+          type: boolean
+        languages:
+          title: Languages supported
+          description: List of languages spoken e.g. ["English", "Yoruba"]
+        additional_info:
+          type: string
+          title: Additional information
+    SendEmailReset:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    SendEmailResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    SetPasswordRetype:
+      type: object
+      properties:
+        new_password:
+          type: string
+        re_new_password:
+          type: string
+        current_password:
+          type: string
+      required:
+      - current_password
+      - new_password
+      - re_new_password
+    SetPasswordRetypeRequest:
+      type: object
+      properties:
+        new_password:
+          type: string
+          minLength: 1
+        re_new_password:
+          type: string
+          minLength: 1
+        current_password:
+          type: string
+          minLength: 1
+      required:
+      - current_password
+      - new_password
+      - re_new_password
+    SetUsername:
+      type: object
+      properties:
+        current_password:
+          type: string
+        new_email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - current_password
+      - new_email
+    SetUsernameRequest:
+      type: object
+      properties:
+        current_password:
+          type: string
+          minLength: 1
+        new_email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+      required:
+      - current_password
+      - new_email
+    StateCareLevelStats:
+      type: object
+      properties:
+        state:
+          type: string
+        total:
+          type: integer
+        breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/CareLevelCount'
+      required:
+      - breakdown
+      - state
+      - total
+    StateOwnershipStats:
+      type: object
+      properties:
+        state:
+          type: string
+        total:
+          type: integer
+        breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnershipCount'
+      required:
+      - breakdown
+      - state
+      - total
+    StateStats:
+      type: object
+      description: Per-state breakdown by facility_type.
+      properties:
+        state:
+          type: string
+        total:
+          type: integer
+        breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityTypeCount'
+      required:
+      - breakdown
+      - state
+      - total
+    StatusEnum:
+      enum:
+      - pending
+      - investigating
+      - resolved
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending Review
+        * `investigating` - Under Investigation
+        * `resolved` - Resolved
+        * `rejected` - Rejected
+    TargetGroupEnum:
+      enum:
+      - adults_and_children
+      - adults_only
+      - children_only
+      type: string
+      description: |-
+        * `adults_and_children` - Adults and Children
+        * `adults_only` - Adults Only (18 and Over)
+        * `children_only` - Children Only (Under 18)
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    User:
+      type: object
+      description: Serializer for user profile
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        username:
+          type: string
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        full_name:
+          type: string
+          readOnly: true
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+        is_verified:
+          type: boolean
+          readOnly: true
+          title: Verified
+          description: Designates whether the user has verified their email.
+        review_count:
+          type: integer
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - full_name
+      - id
+      - is_verified
+      - review_count
+      - username
+    UserCreatePasswordRetype:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        id:
+          type: integer
+          readOnly: true
+        re_password:
+          type: string
+      required:
+      - email
+      - id
+      - re_password
+      - username
+    UserCreatePasswordRetypeRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        re_password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+      - re_password
+      - username
+    UserRequest:
+      type: object
+      description: Serializer for user profile
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+      required:
+      - username
+    UserUpdate:
+      type: object
+      description: Serializer for updating user profile
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+    UserUpdateRequest:
+      type: object
+      description: Serializer for updating user profile
+      properties:
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          description: User phone number
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+    UsernameResetConfirm:
+      type: object
+      properties:
+        new_email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - new_email
+    UsernameResetConfirmRequest:
+      type: object
+      properties:
+        new_email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+      required:
+      - new_email
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

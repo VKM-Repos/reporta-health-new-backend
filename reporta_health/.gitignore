@@ -75,4 +75,5 @@ __pycache__/
 *.log
 logs/
 
-import_facilities.py
+scripts/
+ reporta_health_backup.dump

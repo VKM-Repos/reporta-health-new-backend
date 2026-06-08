@@ -1,0 +1,49 @@
+# Base image
+FROM python:3.12-slim
+
+# Environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DJANGO_SETTINGS_MODULE=config.settings.production
+
+# Work directory
+WORKDIR /app
+
+# Install system dependencies for GeoDjango + PostGIS
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    binutils \
+    libproj-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    postgresql-client \
+    netcat-traditional \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements/ ./requirements/
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements/prod.txt
+
+# Copy project
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/staticfiles /app/media
+
+# Create non-root user
+RUN addgroup --system django && \
+    adduser --system --ingroup django django && \
+    chown -R django:django /app
+
+# Copy and set entrypoints
+COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.celery.sh /entrypoint.celery.sh
+RUN chmod +x /entrypoint.sh /entrypoint.celery.sh
+
+USER django
+
+EXPOSE 8000
+
+ENTRYPOINT ["/entrypoint.sh"]

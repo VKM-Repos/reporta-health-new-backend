@@ -189,11 +189,11 @@ class Facility(models.Model):
         """Get longitude from Point"""
         return self.location.x if self.location else None
 
+def get_facilities_storage():
+    from config.settings.storage import FacilitiesStorage
+    return FacilitiesStorage()
 
 class FacilityImage(models.Model):
-    """
-    Images for facilities
-    """
     facility = models.ForeignKey(
         Facility,
         on_delete=models.CASCADE,
@@ -201,7 +201,8 @@ class FacilityImage(models.Model):
     )
     image = models.ImageField(
         _('image'),
-        upload_to='facilities/%Y/%m/%d/'
+        storage=get_facilities_storage,
+        upload_to='%Y/%m/%d/'
     )
     caption = models.CharField(_('caption'), max_length=255, blank=True)
     is_primary = models.BooleanField(
@@ -211,23 +212,6 @@ class FacilityImage(models.Model):
     )
     uploaded_at = models.DateTimeField(_('uploaded at'), auto_now_add=True)
     
-    class Meta:
-        verbose_name = _('facility image')
-        verbose_name_plural = _('facility images')
-        ordering = ['-is_primary', '-uploaded_at']
-    
-    def __str__(self):
-        return f"Image for {self.facility.name}"
-    
-    def save(self, *args, **kwargs):
-        # If this is set as primary, unset all other primary images
-        if self.is_primary:
-            FacilityImage.objects.filter(
-                facility=self.facility,
-                is_primary=True
-            ).update(is_primary=False)
-        super().save(*args, **kwargs)
-
 
 class SARCProfile(models.Model):
     """

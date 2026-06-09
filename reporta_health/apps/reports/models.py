@@ -84,10 +84,11 @@ class FacilityReport(models.Model):
         return f"Report: {self.facility.name} - {self.get_reason_display()}"
 
 
+def get_reports_storage():
+    from config.settings.storage import ReportsStorage
+    return ReportsStorage()
+
 class ReportImage(models.Model):
-    """
-    Evidence images attached to reports
-    """
     report = models.ForeignKey(
         FacilityReport,
         on_delete=models.CASCADE,
@@ -95,11 +96,12 @@ class ReportImage(models.Model):
     )
     image = models.ImageField(
         _('image'),
-        upload_to='reports/%Y/%m/%d/'
+        storage=get_reports_storage,
+        upload_to='%Y/%m/%d/'
     )
     caption = models.CharField(_('caption'), max_length=255, blank=True)
     uploaded_at = models.DateTimeField(_('uploaded at'), auto_now_add=True)
-    
+
     class Meta:
         verbose_name = _('report image')
         verbose_name_plural = _('report images')

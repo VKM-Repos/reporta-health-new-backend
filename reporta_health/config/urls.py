@@ -49,7 +49,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    
+
     # Django Debug Toolbar
     try:
         import debug_toolbar
@@ -58,6 +58,10 @@ if settings.DEBUG:
         ] + urlpatterns
     except ImportError:
         pass
+
+
+
+
 
 # Customize admin site
 admin.site.site_header = "Reporta Health Admin"

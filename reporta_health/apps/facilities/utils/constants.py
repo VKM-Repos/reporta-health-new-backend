@@ -1,22 +1,7 @@
-ZOOM_GRID = {
-    1:  5.0,
-    2:  4.0,
-    3:  3.0,
-    4:  2.0,
-    5:  1.5,
-    6:  1.0,
-    7:  0.5,
-    8:  0.25,
-    9:  0.1,
-    10: 0.05,
-    11: 0.025,
-    12: 0.01,
-    13: 0.005,
-}
-
-INDIVIDUAL_FACILITY_ZOOM = 12
+INDIVIDUAL_FACILITY_ZOOM = 11
 MAX_INDIVIDUAL_FACILITIES = 200
 MAX_CLUSTERS = 500
+MIN_CLUSTER_SIZE = 10  # new — cells below this are dissolved into individual pins instead of shown as a cluster bubble
 
 CACHE_TIMEOUT_NEARBY = 60 * 5
 CACHE_TIMEOUT_BROWSE = 60 * 15

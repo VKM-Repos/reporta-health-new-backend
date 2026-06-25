@@ -56,7 +56,8 @@ class FacilityListSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.URI)
     def get_primary_image(self, obj):
         """Get primary image URL"""
-        primary = obj.images.filter(is_primary=True).first()
+        images = obj.images.all()  # uses prefetch cache, no extra query
+        primary = next((img for img in images if img.is_primary), None)
         if primary:
             request = self.context.get('request')
             if request:

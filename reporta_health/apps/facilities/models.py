@@ -12,7 +12,6 @@ class Facility(models.Model):
     """
     Health facility model with geospatial location
     """
-    
     FACILITY_TYPES = [
         ('hospital', 'Hospital'),
         ('clinic', 'Clinic'),
@@ -24,6 +23,13 @@ class Facility(models.Model):
         ('eye', 'Eye Clinic'),
         ('physiotherapy', 'Physiotherapy Center'),
         ('sarcs', 'Sexual Assault Referral Centre'),
+        # new — for GBV service providers that aren't health facilities
+        ('ngo', 'NGO / Civil Society Organisation'),
+        ('police', 'Police / Security'),
+        ('legal_aid', 'Legal Aid Centre'),
+        ('social_welfare', 'Social Welfare Office'),
+        ('shelter', 'Shelter / Refuge'),
+        ('phc', 'Primary Health Centre'),
         ('other', 'Other'),
     ]
     
@@ -90,7 +96,10 @@ class Facility(models.Model):
         _('location'),
         geography=True,
         srid=4326,
-        help_text=_('Geospatial coordinates (longitude, latitude)')
+        help_text=_('Geospatial coordinates (longitude, latitude)'),
+        null=True,
+        blank=True,
+
     )
     city = models.CharField(_('city'), max_length=100, blank=True)
     state = models.CharField(_('state'), max_length=100, blank=True)
@@ -137,6 +146,13 @@ class Facility(models.Model):
     _('has SARC'),
     default=False,
     help_text=_('Does this facility have a Sexual Assault Referral Centre unit?'),
+    db_index=True,
+)
+    # GBV Services
+    has_gbv_services = models.BooleanField(
+    _('has GBV services'),
+    default=False,
+    help_text=_('Does this facility offer Gender Based Violence support services?'),
     db_index=True,
 )
 
@@ -284,3 +300,109 @@ class SARCProfile(models.Model):
     def __str__(self):
         name = self.unit_name or self.facility.name
         return f"SARC: {name}"
+
+class GBVServiceProfile(models.Model):
+    """
+    Gender Based Violence service profile.
+    Linked to a Facility — covers hospitals with GBV units,
+    NGOs, legal aid offices, police FSUs, shelters, and
+    social welfare offices.
+    """
+
+    SERVICE_TYPES = [
+        ('health', 'Health Care'),
+        ('legal_aid', 'Legal Aid'),
+        ('psychosocial', 'Psychosocial Support'),
+        ('police_security', 'Security / Police'),
+        ('shelter', 'Temporary Accommodation / Refuge'),
+        ('economic', 'Economic Empowerment / Livelihoods'),
+        ('other', 'Other'),
+    ]
+
+    ORGANISATION_TYPES = [
+        ('governmental', 'Governmental'),
+        ('national_ngo', 'National NGO'),
+        ('international_ngo', 'International NGO'),
+        ('community_based', 'Community-Based Organization'),
+        ('faith_based', 'Faith-Based Organization'),
+        ('private', 'Private'),
+        ('other', 'Other'),
+    ]
+
+    TARGET_GROUPS = [
+        ('adults_and_children', 'Adults and Children'),
+        ('adults_only', 'Adults Only (18 and Over)'),
+        ('children_only', 'Children Only (Under 18)'),
+    ]
+
+    facility = models.OneToOneField(
+        Facility,
+        on_delete=models.CASCADE,
+        related_name='gbv_profile',
+    )
+
+    # What services this provider offers — stored as list
+    # e.g. ["health", "legal_aid", "psychosocial"]
+    service_types = models.JSONField(
+        _('service types'),
+        default=list,
+        help_text=_('List of GBV service type codes offered'),
+    )
+
+    # Who they serve
+    target_group = models.CharField(
+        _('target group'),
+        max_length=50,
+        choices=TARGET_GROUPS,
+        default='adults_and_children',
+    )
+
+    # Organisation classification
+    organisation_type = models.CharField(
+        _('organisation type'),
+        max_length=50,
+        choices=ORGANISATION_TYPES,
+        default='governmental',
+        db_index=True,
+    )
+
+    # Contact
+    contact_person = models.CharField(
+        _('contact person'),
+        max_length=255,
+        blank=True,
+    )
+
+    # Accessibility
+    accessibility_info = models.TextField(
+        _('accessibility info'),
+        blank=True,
+        help_text=_('Wheelchair access, sign language, ramps etc'),
+    )
+
+    # Rich text description of specific services
+    # Preserves the detailed legacy data e.g.
+    # "1. Clinical management of rape cases 2. HIV PEP..."
+    services_detail = models.TextField(
+        _('services detail'),
+        blank=True,
+        help_text=_('Detailed description of specific services offered'),
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('GBV service profile')
+        verbose_name_plural = _('GBV service profiles')
+        indexes = [
+            models.Index(fields=['organisation_type']),
+            models.Index(fields=['target_group']),
+        ]
+
+    def __str__(self):
+        return f"GBV: {self.facility.name}"
+
+    def has_service(self, service_type: str) -> bool:
+        """Check if this provider offers a specific service type."""
+        return service_type in (self.service_types or [])

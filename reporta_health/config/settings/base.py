@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'apps.facilities',
     'apps.reviews',
     'apps.reports',
-    'apps.gbv',
 ]
 
 MIDDLEWARE = [

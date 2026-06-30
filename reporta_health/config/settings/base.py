@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
     'storages',
-    'django_extensions',
     'djoser',
     
     # Local apps
@@ -42,7 +41,6 @@ INSTALLED_APPS = [
     'apps.facilities',
     'apps.reviews',
     'apps.reports',
-    'apps.gbv',
 ]
 
 MIDDLEWARE = [
@@ -76,18 +74,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': config('DB_NAME', default='reporta_health'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
-}
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
@@ -123,12 +109,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-# Media files (User uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
+# STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_DIR = BASE_DIR / 'static'
+STATICFILES_DIRS = [STATIC_DIR] if STATIC_DIR.exists() else []
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -165,6 +148,7 @@ REST_FRAMEWORK = {
         'auth': '10/hour',
         'report_create': '20/day',
         'review_create': '10/day',
+        'facility_clusters': '120/minute', 
     },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_RENDERER_CLASSES': [
@@ -234,9 +218,11 @@ CELERY_TIMEZONE = TIME_ZONE
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', default='redis://localhost:6379/1'),
+        'LOCATION': config('REDIS_URL', default='redis://localhost:6379/0'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
         }
     }
 }
@@ -291,3 +277,6 @@ LOGGING = {
 
 # Create logs directory if it doesn't exist
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+from config.settings.database import *
+from config.settings.storage import *

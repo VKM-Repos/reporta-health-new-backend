@@ -5,7 +5,7 @@ Serializers for Facility models
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from django.contrib.gis.geos import Point
-from .models import Facility, FacilityImage
+from .models import Facility, FacilityImage, GBVServiceProfile, SARCProfile
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
 
@@ -20,6 +20,44 @@ class FacilityImageSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'uploaded_at')
 
 
+class GBVServiceProfileSerializer(serializers.ModelSerializer):
+    """
+    Nested serializer for GBV service profile.
+    Used inside FacilityDetailSerializer.
+    """
+    class Meta:
+        model = GBVServiceProfile
+        fields = (
+            'service_types',
+            'target_group',
+            'organisation_type',
+            'contact_person',
+            'accessibility_info',
+            'services_detail',
+        )
+
+
+class SARCProfileInlineSerializer(serializers.ModelSerializer):
+    """
+    Nested serializer for SARC profile.
+    Used inside FacilityDetailSerializer.
+    """
+    class Meta:
+        model = SARCProfile
+        fields = (
+            'unit_name',
+            'hotline_number',
+            'has_counseling',
+            'has_legal_aid',
+            'has_hiv_pep',
+            'has_forensic',
+            'has_sti_testing',
+            'has_shelter_referral',
+            'has_emergency_contraception',
+            'additional_info',
+        )
+
+
 class FacilityListSerializer(serializers.ModelSerializer):
     """
     Serializer for facility list view (lightweight)
@@ -27,6 +65,8 @@ class FacilityListSerializer(serializers.ModelSerializer):
     distance = serializers.SerializerMethodField()
     primary_image = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
+    gbv_profile = GBVServiceProfileSerializer(read_only=True)
+    sarc_profile = SARCProfileInlineSerializer(read_only=True)
     
     class Meta:
         model = Facility
@@ -42,6 +82,11 @@ class FacilityListSerializer(serializers.ModelSerializer):
             'average_rating',
             'total_reviews',
             'is_verified',
+            'has_sarcs',
+            'has_fistula_programme',
+            'has_gbv_services',
+            'gbv_profile',   # added: nested GBV profile
+            'sarc_profile',  # added: nested SARC profile
             'distance',
             'primary_image',
         )
@@ -56,7 +101,8 @@ class FacilityListSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.URI)
     def get_primary_image(self, obj):
         """Get primary image URL"""
-        primary = obj.images.filter(is_primary=True).first()
+        images = obj.images.all()  # uses prefetch cache, no extra query
+        primary = next((img for img in images if img.is_primary), None)
         if primary:
             request = self.context.get('request')
             if request:
@@ -79,7 +125,6 @@ class FacilityListSerializer(serializers.ModelSerializer):
             }
         return None
 
-
 class FacilityDetailSerializer(serializers.ModelSerializer):
     """
     Detailed serializer for single facility view
@@ -88,6 +133,8 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
     distance = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
     operating_hours = serializers.SerializerMethodField()
+    gbv_profile = GBVServiceProfileSerializer(read_only=True)  # added: nested GBV profile
+    sarc_profile = SARCProfileInlineSerializer(read_only=True)  # added: nested SARC profile
     
     class Meta:
         model = Facility
@@ -109,6 +156,11 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
             'has_wheelchair_access',
             'has_emergency_service',
             'is_verified',
+            'has_sarcs',
+            'has_fistula_programme',
+            'has_gbv_services',
+            'gbv_profile',   # added: nested GBV profile
+            'sarc_profile',  # added: nested SARC profile
             'is_active',
             'average_rating',
             'total_reviews',

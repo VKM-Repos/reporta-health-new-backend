@@ -1,15 +1,25 @@
 #!/bin/sh
 set -e
 
-echo "Waiting for PostgreSQL..."
-for i in $(seq 1 60); do
-    if nc -z "$DB_HOST" "$DB_PORT"; then
-        echo "PostgreSQL is up"
+echo "Waiting for database..."
+python -c "
+import os, time, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
+django.setup()
+from django.db import connections
+from django.db.utils import OperationalError
+for i in range(60):
+    try:
+        connections['default'].ensure_connection()
+        print('Database is ready')
         break
-    fi
-    echo "Attempt $i/60 — waiting..."
-    sleep 1
-done
-nc -z "$DB_HOST" "$DB_PORT" || { echo "PostgreSQL unavailable after 60s — exiting"; exit 1; }
+    except OperationalError:
+        print(f'Attempt {i+1}/60 — waiting...')
+        time.sleep(1)
+else:
+    print('Database unavailable after 60s — exiting')
+    exit(1)
+"
 
+echo "Starting Celery..."
 exec "$@"

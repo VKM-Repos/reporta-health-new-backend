@@ -25,7 +25,7 @@ from drf_spectacular.types import OpenApiTypes
 from rest_framework.views import APIView
 from rest_framework import serializers as drf_serializers
 from rest_framework.pagination import PageNumberPagination
-
+from django.db.models import Prefetch
 
 class FacilityPagination(PageNumberPagination):
     page_size = 20
@@ -43,7 +43,9 @@ class FacilityListView(generics.ListAPIView):
     - ordering: Order by field (e.g., -average_rating, name)
     - is_verified: Filter by verified status
     """
-    queryset = Facility.objects.filter(is_active=True).prefetch_related('images')
+    queryset = Facility.objects.filter(is_active=True).prefetch_related(
+    Prefetch('images', queryset=FacilityImage.objects.filter(is_primary=True))
+)
     serializer_class = FacilityListSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

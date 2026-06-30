@@ -64,6 +64,7 @@ class FacilityClusterView(APIView):
             OpenApiParameter("state",                 OpenApiTypes.STR,  OpenApiParameter.QUERY),
             OpenApiParameter("has_sarcs",             OpenApiTypes.BOOL, OpenApiParameter.QUERY),
             OpenApiParameter("has_fistula_programme", OpenApiTypes.BOOL, OpenApiParameter.QUERY),
+            OpenApiParameter("has_gbv_services",      OpenApiTypes.BOOL, OpenApiParameter.QUERY),
             OpenApiParameter("is_verified",           OpenApiTypes.BOOL, OpenApiParameter.QUERY),
         ],
         responses={200: None},

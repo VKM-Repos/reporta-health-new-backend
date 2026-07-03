@@ -46,31 +46,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'user', 'helpful_count','flag_count', 'is_published', 'is_verified', 'created_at', 'updated_at')
     
-    def validate(self, data):
-        """
-        Validate that user hasn't already reviewed this facility
-        """
-        request = self.context.get('request')
-        facility = data.get('facility')
-        
-        if request and facility:
-            # Check for existing review (only on create, not update)
-            if not self.instance:
-                existing_review = Review.objects.filter(
-                    user=request.user,
-                    facility=facility
-                ).exists()
-                
-                if existing_review:
-                    raise serializers.ValidationError(
-                        "You have already reviewed this facility."
-                    )
-        
-        return data
-    
     def create(self, validated_data):
         """
-        Set user from request
+        Set user from request. Multiple reviews allowed — UI shows latest only.
         """
         request = self.context.get('request')
         validated_data['user'] = request.user
@@ -85,27 +63,8 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('facility', 'rating', 'body', 'is_anonymous', 'visit_date')
     
-    def validate(self, data):
-        """
-        Validate that user hasn't already reviewed this facility
-        """
-        request = self.context.get('request')
-        facility = data.get('facility')
-        
-        if request and facility and not self.instance:
-            existing_review = Review.objects.filter(
-                user=request.user,
-                facility=facility
-            ).exists()
-            
-            if existing_review:
-                raise serializers.ValidationError(
-                    "You have already reviewed this facility. You can edit your existing review instead."
-                )
-        
-        return data
-    
     def create(self, validated_data):
+        # Multiple reviews allowed per user per facility — UI shows latest only
         request = self.context.get('request')
         validated_data['user'] = request.user
         return super().create(validated_data)

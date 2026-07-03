@@ -13,12 +13,11 @@ class FacilityReport(models.Model):
     """
     
     REPORT_REASONS = [
-        ('fake', 'Fake Facility'),
-        ('closed', 'Permanently Closed'),
-        ('wrong_info', 'Wrong Information'),
-        ('inappropriate', 'Inappropriate Content'),
-        ('duplicate', 'Duplicate Entry'),
-        ('spam', 'Spam'),
+        ('does_not_exist', 'Facility Does Not Exist'),
+        ('wrong_info', 'Wrong or Misleading Information'),
+        ('unsafe_conditions', 'Poor and Unsafe Conditions'),
+        ('scam_fraud', 'Scam or Fraud'),
+        ('unlicensed', 'Unlicensed or Unauthorized'),
         ('other', 'Other'),
     ]
     
@@ -30,16 +29,29 @@ class FacilityReport(models.Model):
     ]
     
     # Related objects
+    # added: nullable — null when reporting a facility not yet in the DB (ghost facility report)
     facility = models.ForeignKey(
         'facilities.Facility',
         on_delete=models.CASCADE,
-        related_name='reports'
+        related_name='reports',
+        null=True,
+        blank=True,
     )
     reporter = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='facility_reports'
     )
+    # added: free-text fields used when facility is null (ghost facility report)
+    facility_name = models.CharField(_('facility name'), max_length=255, blank=True)
+    address = models.CharField(_('address'), max_length=500, blank=True)
+    city = models.CharField(_('city'), max_length=100, blank=True)
+    state = models.CharField(_('state'), max_length=100, blank=True)
+    phone_number = models.CharField(_('phone number'), max_length=20, blank=True)
+    # added: report can select multiple reasons
+    reasons = models.JSONField(_('reasons'), default=list, blank=True)
+    # added: hides reporter identity in admin UI when true (reporter FK is still set for accountability)
+    is_anonymous = models.BooleanField(_('reported anonymously'), default=False)
     
     # Report details
     reason = models.CharField(
@@ -47,8 +59,10 @@ class FacilityReport(models.Model):
         max_length=20,
         choices=REPORT_REASONS
     )
+    # changed: now optional — screen labels this "Tell us more (optional)"
     description = models.TextField(
         _('description'),
+        blank=True,
         help_text=_('Detailed explanation of the issue')
     )
     

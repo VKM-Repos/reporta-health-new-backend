@@ -67,7 +67,6 @@ class Review(models.Model):
         verbose_name = _('review')
         verbose_name_plural = _('reviews')
         ordering = ['-created_at']
-        unique_together = ('facility', 'user')  # One review per user per facility
         indexes = [
             models.Index(fields=['facility', '-created_at']),
             models.Index(fields=['user', '-created_at']),

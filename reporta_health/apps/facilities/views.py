@@ -239,3 +239,101 @@ class FacilityStatesView(APIView):
             .order_by('state')
         )
         return Response(list(states))
+
+
+# ── History & Bookmark views ─────────────────────────────────────────────────
+
+HISTORY_LIMIT = 50
+
+
+class FacilityViewHistoryListView(APIView):
+    """
+    GET    /api/facilities/history/   -> recent 50 unique facilities, most recent first
+    DELETE /api/facilities/history/   -> clear all history for the user
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        qs = (
+            FacilityViewHistory.objects
+            .filter(user=request.user)
+            .select_related('facility')[:HISTORY_LIMIT]
+        )
+        serializer = FacilityViewHistorySerializer(qs, many=True)
+        return Response({'count': len(serializer.data), 'results': serializer.data})
+
+    def delete(self, request):
+        FacilityViewHistory.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FacilityViewRecordView(APIView):
+    """
+    POST   /api/facilities/:facility_id/view/   -> record/refresh a view
+    DELETE /api/facilities/:facility_id/view/   -> remove single facility from history
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, facility_id):
+        facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
+        if not facility:
+            return Response({'error': 'Facility not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        FacilityViewHistory.objects.update_or_create(
+            user=request.user,
+            facility=facility,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def delete(self, request, facility_id):
+        deleted, _ = FacilityViewHistory.objects.filter(
+            user=request.user, facility_id=facility_id
+        ).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FacilityBookmarkListView(APIView):
+    """
+    GET /api/facilities/bookmarks/   -> all saved facilities, most recent first
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        qs = (
+            FacilityBookmark.objects
+            .filter(user=request.user)
+            .select_related('facility')
+        )
+        serializer = FacilityBookmarkSerializer(qs, many=True)
+        return Response({'count': len(serializer.data), 'results': serializer.data})
+
+
+class FacilityBookmarkToggleView(APIView):
+    """
+    POST   /api/facilities/:facility_id/bookmark/   -> save
+    DELETE /api/facilities/:facility_id/bookmark/   -> unsave
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, facility_id):
+        facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
+        if not facility:
+            return Response({'error': 'Facility not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        bookmark, created = FacilityBookmark.objects.get_or_create(
+            user=request.user, facility=facility
+        )
+        return Response(
+            {'bookmarked': True},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    def delete(self, request, facility_id):
+        deleted, _ = FacilityBookmark.objects.filter(
+            user=request.user, facility_id=facility_id
+        ).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)

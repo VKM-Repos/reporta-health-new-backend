@@ -5,7 +5,7 @@ Serializers for Facility models
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from django.contrib.gis.geos import Point
-from .models import Facility, FacilityImage, GBVServiceProfile, SARCProfile
+from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
 
@@ -307,3 +307,34 @@ class StateCareLevelStatsSerializer(serializers.Serializer):
     state     = serializers.CharField()
     total     = serializers.IntegerField()
     breakdown = CareLevelCountSerializer(many=True)
+
+# ── History & Bookmark serializers ───────────────────────────────────────────
+
+class FacilityViewHistorySerializer(serializers.ModelSerializer):
+    facility_id = serializers.IntegerField(source='facility.id', read_only=True)
+    name = serializers.CharField(source='facility.name', read_only=True)
+    facility_type = serializers.CharField(source='facility.facility_type', read_only=True)
+    state = serializers.CharField(source='facility.state', read_only=True)
+    lga = serializers.CharField(source='facility.lga', read_only=True)
+    average_rating = serializers.DecimalField(
+        source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
+    )
+
+    class Meta:
+        model = FacilityViewHistory
+        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'viewed_at')
+
+
+class FacilityBookmarkSerializer(serializers.ModelSerializer):
+    facility_id = serializers.IntegerField(source='facility.id', read_only=True)
+    name = serializers.CharField(source='facility.name', read_only=True)
+    facility_type = serializers.CharField(source='facility.facility_type', read_only=True)
+    state = serializers.CharField(source='facility.state', read_only=True)
+    lga = serializers.CharField(source='facility.lga', read_only=True)
+    average_rating = serializers.DecimalField(
+        source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
+    )
+
+    class Meta:
+        model = FacilityBookmark
+        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'created_at')

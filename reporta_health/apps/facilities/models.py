@@ -2,6 +2,7 @@
 Facility models with geospatial support
 """
 
+from django.conf import settings
 from django.contrib.gis.db import models as gis_models
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -300,3 +301,62 @@ class SARCProfile(models.Model):
     def __str__(self):
         name = self.unit_name or self.facility.name
         return f"SARC: {name}"
+
+class FacilityViewHistory(models.Model):
+    """
+    Tracks which facilities a user has recently viewed.
+    One row per (user, facility) — re-viewing bumps viewed_at rather
+    than creating a duplicate entry.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='view_history',
+    )
+    facility = models.ForeignKey(
+        Facility,
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+    viewed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'facility')
+        ordering = ['-viewed_at']
+        indexes = [
+            models.Index(fields=['user', '-viewed_at']),
+        ]
+        verbose_name = _('facility view history')
+        verbose_name_plural = _('facility view history')
+
+    def __str__(self):
+        return f"{self.user} viewed {self.facility_id} at {self.viewed_at}"
+
+
+class FacilityBookmark(models.Model):
+    """
+    Facilities a user has explicitly saved/favorited.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='bookmarks',
+    )
+    facility = models.ForeignKey(
+        Facility,
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'facility')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+        ]
+        verbose_name = _('facility bookmark')
+        verbose_name_plural = _('facility bookmarks')
+
+    def __str__(self):
+        return f"{self.user} saved {self.facility_id}"

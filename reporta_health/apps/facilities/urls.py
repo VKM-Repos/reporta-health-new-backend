@@ -38,4 +38,10 @@ urlpatterns = [
     path('<int:facility_id>/reviews/create/',  review_views.ReviewCreateView.as_view(),    name='facility-review-create'),
     path('<int:facility_id>/reviews/',         review_views.FacilityReviewListView.as_view(), name='facility-reviews'),
     path('sarcs/<int:pk>/', sarc_views.SARCDetailView.as_view(), name='sarc-detail'),
+
+
+    path('history/', views.FacilityViewHistoryListView.as_view(), name='facility-history'),
+    path('<int:facility_id>/view/', views.FacilityViewRecordView.as_view(), name='facility-view-record'),
+    path('bookmarks/', views.FacilityBookmarkListView.as_view(), name='facility-bookmarks'),
+    path('<int:facility_id>/bookmark/', views.FacilityBookmarkToggleView.as_view(), name='facility-bookmark-toggle'),
 ]

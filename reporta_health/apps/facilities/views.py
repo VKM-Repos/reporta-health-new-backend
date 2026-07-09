@@ -17,6 +17,7 @@ from .serializers import (
     FacilityImageSerializer
 )
 from .filters import FacilityFilter
+from .services.spatial import apply_common_filters
 from django.db.models import Prefetch
 from apps.reviews.models import Review
 from django.shortcuts import get_object_or_404
@@ -25,7 +26,7 @@ from drf_spectacular.types import OpenApiTypes
 from rest_framework.views import APIView
 from rest_framework import serializers as drf_serializers
 from rest_framework.pagination import PageNumberPagination
-
+from django.db.models import Prefetch
 
 class FacilityPagination(PageNumberPagination):
     page_size = 20
@@ -43,7 +44,9 @@ class FacilityListView(generics.ListAPIView):
     - ordering: Order by field (e.g., -average_rating, name)
     - is_verified: Filter by verified status
     """
-    queryset = Facility.objects.filter(is_active=True).prefetch_related('images')
+    queryset = Facility.objects.filter(is_active=True).prefetch_related(
+    Prefetch('images', queryset=FacilityImage.objects.filter(is_primary=True))
+)
     serializer_class = FacilityListSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -90,11 +93,11 @@ def nearby_facilities(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Get search radius (default 5km)
+    # Get search radius (default 10km, matches cluster view)
     try:
-        radius = int(request.query_params.get('radius', 5000))
+        radius_km = float(request.query_params.get('radius_km', 10))
     except ValueError:
-        radius = 5000
+        radius_km = 10
     
     # Create user location point
     user_location = Point(longitude, latitude, srid=4326)
@@ -102,15 +105,13 @@ def nearby_facilities(request):
     # Query facilities within radius
     queryset = Facility.objects.filter(
         is_active=True,
-        location__distance_lte=(user_location, D(m=radius))
+        location__distance_lte=(user_location, D(km=radius_km))
     ).annotate(
         distance=Distance('location', user_location)
     ).select_related().prefetch_related('images').order_by('distance')
     
-    # Apply facility type filter if provided
-    facility_type = request.query_params.get('facility_type')
-    if facility_type:
-        queryset = queryset.filter(facility_type=facility_type)
+    # Apply all common filters (facility_type, state, has_gbv_services, has_sarcs, has_fistula_programme)
+    queryset = apply_common_filters(queryset, request.query_params)
     
     # Apply limit
     try:

@@ -16,12 +16,22 @@ class FacilityFilter(django_filters.FilterSet):
     has_wheelchair_access = django_filters.BooleanFilter()
     has_emergency_service = django_filters.BooleanFilter()
     is_verified = django_filters.BooleanFilter()
+    has_sarcs = django_filters.BooleanFilter()
+    has_fistula_programme = django_filters.BooleanFilter()
+    has_gbv_services = django_filters.BooleanFilter()
+    gbv_service_type = django_filters.CharFilter(method="filter_gbv_service_type")
     
 
     min_lat = django_filters.NumberFilter(method='filter_bbox')
     max_lat = django_filters.NumberFilter(method='filter_bbox')
     min_lng = django_filters.NumberFilter(method='filter_bbox')
     max_lng = django_filters.NumberFilter(method='filter_bbox')
+
+    def filter_gbv_service_type(self, queryset, name, value):
+        types = [t.strip() for t in value.split(",")]
+        for service_type in types:
+            queryset = queryset.filter(gbv_profile__service_types__contains=[service_type])
+        return queryset
 
     def filter_bbox(self, queryset, name, value):
         min_lat = self.data.get('min_lat')

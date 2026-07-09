@@ -17,10 +17,32 @@ from apps.users.views import ThrottledTokenObtainPairView, ThrottledTokenRefresh
 # API Router
 router = routers.DefaultRouter()
 
+from django.http import JsonResponse
+
+def health_check(request):
+    return JsonResponse({'status': 'ok'})
+
+from django.http import JsonResponse
+from django.core.cache import cache
+
+def cache_check(request):
+    try:
+        cache.set('test', 'ok', 10)
+        value = cache.get('test')
+        return JsonResponse({'cache': value, 'status': 'ok'})
+    except Exception as e:
+        return JsonResponse({'cache': 'error', 'error': str(e)})
+
+
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
+    
+    # Health Check  
+    path('api/v1/health/', health_check),
+    path('api/v1/cache-check/', cache_check),
+
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
@@ -42,14 +64,13 @@ urlpatterns = [
     path('api/v1/facilities/',  include('apps.facilities.urls')),
     path('api/v1/reviews/',     include('apps.reviews.urls')),
     path('api/v1/reports/',     include('apps.reports.urls')),
-    path('api/v1/gbv/', include('apps.gbv.urls')),
     ]
 
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    
+
     # Django Debug Toolbar
     try:
         import debug_toolbar
@@ -58,6 +79,10 @@ if settings.DEBUG:
         ] + urlpatterns
     except ImportError:
         pass
+
+
+
+
 
 # Customize admin site
 admin.site.site_header = "Reporta Health Admin"

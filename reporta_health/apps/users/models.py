@@ -37,13 +37,17 @@ class User(AbstractUser):
         help_text=_('User phone number')
     )
     
+    def get_avatars_storage():
+        from config.settings.storage import AvatarsStorage
+        return AvatarsStorage()
+
     profile_picture = models.ImageField(
         _('profile picture'),
-        upload_to='profiles/',
+        storage=get_avatars_storage,
+        upload_to='',
         blank=True,
         null=True
     )
-    
     bio = models.TextField(
         _('bio'),
         max_length=500,

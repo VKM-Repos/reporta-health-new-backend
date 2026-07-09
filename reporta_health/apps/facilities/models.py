@@ -13,7 +13,6 @@ class Facility(models.Model):
     """
     Health facility model with geospatial location
     """
-    
     FACILITY_TYPES = [
         ('hospital', 'Hospital'),
         ('clinic', 'Clinic'),
@@ -25,6 +24,13 @@ class Facility(models.Model):
         ('eye', 'Eye Clinic'),
         ('physiotherapy', 'Physiotherapy Center'),
         ('sarcs', 'Sexual Assault Referral Centre'),
+        # new — for GBV service providers that aren't health facilities
+        ('ngo', 'NGO / Civil Society Organisation'),
+        ('police', 'Police / Security'),
+        ('legal_aid', 'Legal Aid Centre'),
+        ('social_welfare', 'Social Welfare Office'),
+        ('shelter', 'Shelter / Refuge'),
+        ('phc', 'Primary Health Centre'),
         ('other', 'Other'),
     ]
     
@@ -91,7 +97,10 @@ class Facility(models.Model):
         _('location'),
         geography=True,
         srid=4326,
-        help_text=_('Geospatial coordinates (longitude, latitude)')
+        help_text=_('Geospatial coordinates (longitude, latitude)'),
+        null=True,
+        blank=True,
+
     )
     city = models.CharField(_('city'), max_length=100, blank=True)
     state = models.CharField(_('state'), max_length=100, blank=True)
@@ -138,6 +147,13 @@ class Facility(models.Model):
     _('has SARC'),
     default=False,
     help_text=_('Does this facility have a Sexual Assault Referral Centre unit?'),
+    db_index=True,
+)
+    # GBV Services
+    has_gbv_services = models.BooleanField(
+    _('has GBV services'),
+    default=False,
+    help_text=_('Does this facility offer Gender Based Violence support services?'),
     db_index=True,
 )
 
@@ -190,11 +206,11 @@ class Facility(models.Model):
         """Get longitude from Point"""
         return self.location.x if self.location else None
 
+def get_facilities_storage():
+    from config.settings.storage import FacilitiesStorage
+    return FacilitiesStorage()
 
 class FacilityImage(models.Model):
-    """
-    Images for facilities
-    """
     facility = models.ForeignKey(
         Facility,
         on_delete=models.CASCADE,
@@ -202,7 +218,8 @@ class FacilityImage(models.Model):
     )
     image = models.ImageField(
         _('image'),
-        upload_to='facilities/%Y/%m/%d/'
+        storage=get_facilities_storage,
+        upload_to='%Y/%m/%d/'
     )
     caption = models.CharField(_('caption'), max_length=255, blank=True)
     is_primary = models.BooleanField(
@@ -212,23 +229,6 @@ class FacilityImage(models.Model):
     )
     uploaded_at = models.DateTimeField(_('uploaded at'), auto_now_add=True)
     
-    class Meta:
-        verbose_name = _('facility image')
-        verbose_name_plural = _('facility images')
-        ordering = ['-is_primary', '-uploaded_at']
-    
-    def __str__(self):
-        return f"Image for {self.facility.name}"
-    
-    def save(self, *args, **kwargs):
-        # If this is set as primary, unset all other primary images
-        if self.is_primary:
-            FacilityImage.objects.filter(
-                facility=self.facility,
-                is_primary=True
-            ).update(is_primary=False)
-        super().save(*args, **kwargs)
-
 
 class SARCProfile(models.Model):
     """

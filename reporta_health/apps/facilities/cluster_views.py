@@ -29,6 +29,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
+from rest_framework.throttling import ScopedRateThrottle
 
 from .models import Facility
 from .serializers import FacilityListSerializer
@@ -42,7 +43,8 @@ logger = logging.getLogger(__name__)
 
 class FacilityClusterView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes   = [AnonRateThrottle]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'facility_clusters'
 
     @extend_schema(
         tags=["Map"],
@@ -62,6 +64,7 @@ class FacilityClusterView(APIView):
             OpenApiParameter("state",                 OpenApiTypes.STR,  OpenApiParameter.QUERY),
             OpenApiParameter("has_sarcs",             OpenApiTypes.BOOL, OpenApiParameter.QUERY),
             OpenApiParameter("has_fistula_programme", OpenApiTypes.BOOL, OpenApiParameter.QUERY),
+            OpenApiParameter("has_gbv_services",      OpenApiTypes.BOOL, OpenApiParameter.QUERY),
             OpenApiParameter("is_verified",           OpenApiTypes.BOOL, OpenApiParameter.QUERY),
         ],
         responses={200: None},

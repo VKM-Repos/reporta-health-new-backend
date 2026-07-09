@@ -56,6 +56,10 @@ def apply_common_filters(qs, params):
     if has_fistula in ("true", "1"):
         qs = qs.filter(has_fistula_programme=True)
 
+    has_gbv_services = params.get("has_gbv_services")
+    if has_gbv_services in ("true", "1"):
+        qs = qs.filter(has_gbv_services=True)
+
     is_verified = params.get("is_verified")
     if is_verified in ("true", "1"):
         qs = qs.filter(is_verified=True)

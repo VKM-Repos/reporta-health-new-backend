@@ -9,7 +9,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Facility, FacilityImage
+from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark
 from .serializers import (
     FacilityListSerializer,
     FacilityDetailSerializer,
@@ -246,6 +246,16 @@ class FacilityStatesView(APIView):
 HISTORY_LIMIT = 50
 
 
+@extend_schema(
+    tags=["Facilities"],
+    summary="Get recently viewed facilities",
+    description=(
+        "Returns the authenticated user's recently viewed facilities, "
+        "most recent first. Limited to the last 50 unique facilities. "
+        "Viewing the same facility again refreshes its position rather "
+        "than creating a duplicate entry."
+    ),
+)
 class FacilityViewHistoryListView(APIView):
     """
     GET    /api/facilities/history/   -> recent 50 unique facilities, most recent first
@@ -274,6 +284,12 @@ class FacilityViewRecordView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Facilities"],
+        summary="Record a facility view",
+        description="Records that the authenticated user viewed this facility. If already in their history, refreshes it to the top instead of duplicating.",
+        responses={204: None, 404: None},
+    )
     def post(self, request, facility_id):
         facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
         if not facility:
@@ -285,6 +301,12 @@ class FacilityViewRecordView(APIView):
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        tags=["Facilities"],
+        summary="Remove a facility from view history",
+        description="Removes this single facility from the authenticated user's view history.",
+        responses={204: None, 404: None},
+    )
     def delete(self, request, facility_id):
         deleted, _ = FacilityViewHistory.objects.filter(
             user=request.user, facility_id=facility_id
@@ -294,6 +316,14 @@ class FacilityViewRecordView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(
+    tags=["Facilities"],
+    summary="Get saved (bookmarked) facilities",
+    description=(
+        "Returns all facilities the authenticated user has saved, "
+        "most recently saved first."
+    ),
+)
 class FacilityBookmarkListView(APIView):
     """
     GET /api/facilities/bookmarks/   -> all saved facilities, most recent first
@@ -317,6 +347,12 @@ class FacilityBookmarkToggleView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        tags=["Facilities"],
+        summary="Save a facility",
+        description="Bookmarks this facility for the authenticated user. Idempotent — calling this again on an already-saved facility returns 200 instead of creating a duplicate or erroring.",
+        responses={201: None, 200: None, 404: None},
+    )
     def post(self, request, facility_id):
         facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
         if not facility:
@@ -330,104 +366,12 @@ class FacilityBookmarkToggleView(APIView):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-    def delete(self, request, facility_id):
-        deleted, _ = FacilityBookmark.objects.filter(
-            user=request.user, facility_id=facility_id
-        ).delete()
-        if not deleted:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# ── History & Bookmark views ─────────────────────────────────────────────────
-
-HISTORY_LIMIT = 50
-
-
-class FacilityViewHistoryListView(APIView):
-    """
-    GET    /api/facilities/history/   -> recent 50 unique facilities, most recent first
-    DELETE /api/facilities/history/   -> clear all history for the user
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        qs = (
-            FacilityViewHistory.objects
-            .filter(user=request.user)
-            .select_related('facility')[:HISTORY_LIMIT]
-        )
-        serializer = FacilityViewHistorySerializer(qs, many=True)
-        return Response({'count': len(serializer.data), 'results': serializer.data})
-
-    def delete(self, request):
-        FacilityViewHistory.objects.filter(user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class FacilityViewRecordView(APIView):
-    """
-    POST   /api/facilities/:facility_id/view/   -> record/refresh a view
-    DELETE /api/facilities/:facility_id/view/   -> remove single facility from history
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, facility_id):
-        facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
-        if not facility:
-            return Response({'error': 'Facility not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        FacilityViewHistory.objects.update_or_create(
-            user=request.user,
-            facility=facility,
-        )
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def delete(self, request, facility_id):
-        deleted, _ = FacilityViewHistory.objects.filter(
-            user=request.user, facility_id=facility_id
-        ).delete()
-        if not deleted:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class FacilityBookmarkListView(APIView):
-    """
-    GET /api/facilities/bookmarks/   -> all saved facilities, most recent first
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        qs = (
-            FacilityBookmark.objects
-            .filter(user=request.user)
-            .select_related('facility')
-        )
-        serializer = FacilityBookmarkSerializer(qs, many=True)
-        return Response({'count': len(serializer.data), 'results': serializer.data})
-
-
-class FacilityBookmarkToggleView(APIView):
-    """
-    POST   /api/facilities/:facility_id/bookmark/   -> save
-    DELETE /api/facilities/:facility_id/bookmark/   -> unsave
-    """
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, facility_id):
-        facility = Facility.objects.filter(pk=facility_id, is_active=True).first()
-        if not facility:
-            return Response({'error': 'Facility not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        bookmark, created = FacilityBookmark.objects.get_or_create(
-            user=request.user, facility=facility
-        )
-        return Response(
-            {'bookmarked': True},
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
-        )
-
+    @extend_schema(
+        tags=["Facilities"],
+        summary="Remove a saved facility",
+        description="Removes this facility from the authenticated user's bookmarks.",
+        responses={204: None, 404: None},
+    )
     def delete(self, request, facility_id):
         deleted, _ = FacilityBookmark.objects.filter(
             user=request.user, facility_id=facility_id

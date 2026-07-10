@@ -14,7 +14,9 @@ from .serializers import (
     FacilityListSerializer,
     FacilityDetailSerializer,
     FacilityCreateSerializer,
-    FacilityImageSerializer
+    FacilityImageSerializer,
+    FacilityViewHistorySerializer,
+    FacilityBookmarkSerializer,
 )
 from .filters import FacilityFilter
 from .services.spatial import apply_common_filters

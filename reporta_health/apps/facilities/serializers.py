@@ -338,35 +338,3 @@ class FacilityBookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacilityBookmark
         fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'created_at')
-
-
-# ── History & Bookmark serializers ───────────────────────────────────────────
-
-class FacilityViewHistorySerializer(serializers.ModelSerializer):
-    facility_id = serializers.IntegerField(source='facility.id', read_only=True)
-    name = serializers.CharField(source='facility.name', read_only=True)
-    facility_type = serializers.CharField(source='facility.facility_type', read_only=True)
-    state = serializers.CharField(source='facility.state', read_only=True)
-    lga = serializers.CharField(source='facility.lga', read_only=True)
-    average_rating = serializers.DecimalField(
-        source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
-    )
-
-    class Meta:
-        model = FacilityViewHistory
-        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'viewed_at')
-
-
-class FacilityBookmarkSerializer(serializers.ModelSerializer):
-    facility_id = serializers.IntegerField(source='facility.id', read_only=True)
-    name = serializers.CharField(source='facility.name', read_only=True)
-    facility_type = serializers.CharField(source='facility.facility_type', read_only=True)
-    state = serializers.CharField(source='facility.state', read_only=True)
-    lga = serializers.CharField(source='facility.lga', read_only=True)
-    average_rating = serializers.DecimalField(
-        source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
-    )
-
-    class Meta:
-        model = FacilityBookmark
-        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'created_at')

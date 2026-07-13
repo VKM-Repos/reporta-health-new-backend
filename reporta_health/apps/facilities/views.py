@@ -35,6 +35,21 @@ class FacilityPagination(PageNumberPagination):
     page_size_query_param = 'page_size'  
     max_page_size = 100                 
 
+
+def get_user_location_from_params(request):
+    """
+    Parse optional lat/lng query params into a Point, or return None.
+    Used to conditionally annotate distance on views where location isn't required.
+    """
+    lat = request.query_params.get('lat')
+    lng = request.query_params.get('lng')
+    if lat is None or lng is None:
+        return None
+    try:
+        return Point(float(lng), float(lat), srid=4326)
+    except (TypeError, ValueError):
+        return None
+
 class FacilityListView(generics.ListAPIView):
     """
     List all facilities with filtering and search
@@ -137,14 +152,31 @@ def nearby_facilities(request):
     })
 
 
+@extend_schema(
+    tags=["Facilities"],
+    parameters=[
+        OpenApiParameter("lat", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Latitude — if provided with lng, response includes distance"),
+        OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Longitude — if provided with lat, response includes distance"),
+    ],
+)
 class FacilityDetailView(generics.RetrieveAPIView):
     """
     Get facility details
     GET /api/facilities/:id/
+    Optional query parameters:
+    - lat, lng: if both provided, response includes distance from this point
     """
-    queryset = Facility.objects.filter(is_active=True).prefetch_related('images', Prefetch('reviews', queryset=Review.objects.only('id', 'rating')))
     serializer_class = FacilityDetailSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        qs = Facility.objects.filter(is_active=True).prefetch_related(
+            'images', Prefetch('reviews', queryset=Review.objects.only('id', 'rating'))
+        )
+        user_location = get_user_location_from_params(self.request)
+        if user_location:
+            qs = qs.annotate(distance=Distance('location', user_location))
+        return qs
 
 
 class FacilityCreateView(generics.CreateAPIView):
@@ -257,11 +289,17 @@ HISTORY_LIMIT = 50
         "Viewing the same facility again refreshes its position rather "
         "than creating a duplicate entry."
     ),
+    parameters=[
+        OpenApiParameter("lat", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Latitude — if provided with lng, response includes distance"),
+        OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Longitude — if provided with lat, response includes distance"),
+    ],
 )
 class FacilityViewHistoryListView(APIView):
     """
     GET    /api/facilities/history/   -> recent 50 unique facilities, most recent first
     DELETE /api/facilities/history/   -> clear all history for the user
+    Optional query parameters:
+    - lat, lng: if both provided, response includes distance from this point
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -269,8 +307,12 @@ class FacilityViewHistoryListView(APIView):
         qs = (
             FacilityViewHistory.objects
             .filter(user=request.user)
-            .select_related('facility')[:HISTORY_LIMIT]
+            .select_related('facility')
         )
+        user_location = get_user_location_from_params(request)
+        if user_location:
+            qs = qs.annotate(distance=Distance('facility__location', user_location))
+        qs = qs[:HISTORY_LIMIT]
         serializer = FacilityViewHistorySerializer(qs, many=True)
         return Response({'count': len(serializer.data), 'results': serializer.data})
 
@@ -325,10 +367,16 @@ class FacilityViewRecordView(APIView):
         "Returns all facilities the authenticated user has saved, "
         "most recently saved first."
     ),
+    parameters=[
+        OpenApiParameter("lat", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Latitude — if provided with lng, response includes distance"),
+        OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Longitude — if provided with lat, response includes distance"),
+    ],
 )
 class FacilityBookmarkListView(APIView):
     """
     GET /api/facilities/bookmarks/   -> all saved facilities, most recent first
+    Optional query parameters:
+    - lat, lng: if both provided, response includes distance from this point
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -338,6 +386,9 @@ class FacilityBookmarkListView(APIView):
             .filter(user=request.user)
             .select_related('facility')
         )
+        user_location = get_user_location_from_params(request)
+        if user_location:
+            qs = qs.annotate(distance=Distance('facility__location', user_location))
         serializer = FacilityBookmarkSerializer(qs, many=True)
         return Response({'count': len(serializer.data), 'results': serializer.data})
 

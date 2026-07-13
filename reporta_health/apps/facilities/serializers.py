@@ -319,10 +319,17 @@ class FacilityViewHistorySerializer(serializers.ModelSerializer):
     average_rating = serializers.DecimalField(
         source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
     )
+    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = FacilityViewHistory
-        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'viewed_at')
+        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'distance', 'viewed_at')
+
+    def get_distance(self, obj):
+        """Distance from user location, only present if the view was annotated with it"""
+        if hasattr(obj, 'distance') and obj.distance is not None:
+            return round(obj.distance.m, 2)
+        return None
 
 
 class FacilityBookmarkSerializer(serializers.ModelSerializer):
@@ -334,7 +341,14 @@ class FacilityBookmarkSerializer(serializers.ModelSerializer):
     average_rating = serializers.DecimalField(
         source='facility.average_rating', max_digits=3, decimal_places=2, read_only=True
     )
+    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = FacilityBookmark
-        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'created_at')
+        fields = ('facility_id', 'name', 'facility_type', 'state', 'lga', 'average_rating', 'distance', 'created_at')
+
+    def get_distance(self, obj):
+        """Distance from user location, only present if the view was annotated with it"""
+        if hasattr(obj, 'distance') and obj.distance is not None:
+            return round(obj.distance.m, 2)
+        return None

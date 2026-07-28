@@ -59,3 +59,4 @@ vine             # Celery promises
 click            # Celery CLI
 python-dateutil  # Date utilities
 PyYAML           # YAML support
+django-unfold==0.38.0

@@ -77,3 +77,7 @@ logs/
 
 scripts/
 reporta_health_backup.dump
+import_facilities.py
+import_fistula.py
+import_gbv_services.py
+import_sarc.py

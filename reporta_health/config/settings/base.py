@@ -18,6 +18,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(','
 
 # Application definition
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,8 +44,17 @@ INSTALLED_APPS = [
     'apps.reports',
 ]
 
+UNFOLD = {
+    "SITE_TITLE": "Reporta Health Admin",
+    "SITE_HEADER": "Reporta Health",
+    "SITE_URL": "/",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS
     'apps.core.middleware.RequestResponseLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -143,12 +153,12 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '60/hour',
+        'anon': '3000/minute',
         'user': '1000/hour',
         'auth': '10/hour',
         'report_create': '20/day',
         'review_create': '10/day',
-        'facility_clusters': '120/minute', 
+        'facility_clusters': '1000/minute', 
     },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_RENDERER_CLASSES': [
@@ -177,6 +187,7 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'SEND_ACTIVATION_EMAIL': True,
     'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password/{uid}/{token}',
     'SERIALIZERS': {
@@ -185,8 +196,8 @@ DJOSER = {
         'current_user': 'apps.users.serializers.UserSerializer',
     },
     'EMAIL': {
-        'activation': 'apps.users.emails.ActivationEmail',
-        'password_reset': 'apps.users.emails.PasswordResetEmail',
+        'activation': 'apps.users.emails.CustomActivationEmail',
+        'password_reset': 'apps.users.emails.CustomPasswordResetEmail',
     },
 }
 

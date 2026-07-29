@@ -20,8 +20,7 @@ MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 # Django Debug Toolbar
 INTERNAL_IPS = ['127.0.0.1', 'localhost']
 
-# Console email backend for development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email backend is configured via .env (see base.py) — no override here
 
 # Allow all origins in development (React Native dev server)
 CORS_ALLOW_ALL_ORIGINS = True
@@ -41,9 +40,6 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
-        profile_session_sample_rate=1.0,
-        profile_lifecycle="trace",
         send_default_pii=False,
-        enable_logs=True,
         environment='development',
     )

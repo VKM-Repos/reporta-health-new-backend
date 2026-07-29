@@ -1,0 +1,17 @@
+/* Fix for GeoDjango OSMWidget collapsing to 0 width/height under django-unfold */
+.dj-geometry-widget,
+.dj-geometry-widget .olMap,
+#id_location_map,
+.olMap,
+div[id$="_map"] {
+    width: 100% !important;
+    height: 400px !important;
+    min-height: 400px !important;
+    display: block !important;
+}
+
+/* Ensure the wrapping container isn't collapsed by flex/grid rules */
+.dj-geometry-widget {
+    min-height: 420px !important;
+    overflow: visible !important;
+}

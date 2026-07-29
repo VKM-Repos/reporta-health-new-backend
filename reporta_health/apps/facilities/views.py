@@ -9,7 +9,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark
+from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark, GBVServiceProfile
 from .serializers import (
     FacilityListSerializer,
     FacilityDetailSerializer,
@@ -50,6 +50,12 @@ def get_user_location_from_params(request):
     except (TypeError, ValueError):
         return None
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("lat", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Latitude - if provided with lng, response includes distance"),
+        OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=False, description="Longitude - if provided with lat, response includes distance"),
+    ],
+)
 class FacilityListView(generics.ListAPIView):
     """
     List all facilities with filtering and search
@@ -61,17 +67,23 @@ class FacilityListView(generics.ListAPIView):
     - ordering: Order by field (e.g., -average_rating, name)
     - is_verified: Filter by verified status
     """
-    queryset = Facility.objects.filter(is_active=True).prefetch_related(
-    Prefetch('images', queryset=FacilityImage.objects.filter(is_primary=True))
-)
     serializer_class = FacilityListSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = FacilityFilter
     search_fields = ['name', 'description', 'services', 'address']
-    ordering_fields = ['name', 'average_rating', 'created_at', 'total_reviews']
+    ordering_fields = ['name', 'average_rating', 'created_at', 'total_reviews', 'distance']
     ordering = ['-average_rating']
     pagination_class = FacilityPagination  
+
+    def get_queryset(self):
+        qs = Facility.objects.filter(is_active=True).prefetch_related(
+            Prefetch('images', queryset=FacilityImage.objects.filter(is_primary=True))
+        )
+        user_location = get_user_location_from_params(self.request)
+        if user_location:
+            qs = qs.annotate(distance=Distance('location', user_location))
+        return qs
 
 
 @extend_schema(
@@ -80,6 +92,22 @@ class FacilityListView(generics.ListAPIView):
         OpenApiParameter("lng", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, required=True, description="Longitude"),
         OpenApiParameter("radius", OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Search radius in meters"),
         OpenApiParameter("limit", OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Max results"),
+        OpenApiParameter("facility_type", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by facility type"),
+        OpenApiParameter("state", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by state (exact, case-insensitive)"),
+        OpenApiParameter("city", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by city (partial match)"),
+        OpenApiParameter("lga", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by LGA (partial match)"),
+        OpenApiParameter("ownership", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by ownership type"),
+        OpenApiParameter("care_level", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Filter by care level"),
+        OpenApiParameter("min_rating", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, description="Minimum average rating"),
+        OpenApiParameter("max_rating", OpenApiTypes.FLOAT, location=OpenApiParameter.QUERY, description="Maximum average rating"),
+        OpenApiParameter("has_sarcs", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to facilities with a SARC unit"),
+        OpenApiParameter("has_fistula_programme", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to facilities with a fistula programme"),
+        OpenApiParameter("has_gbv_services", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to facilities offering GBV services"),
+        OpenApiParameter("has_parking", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to facilities with parking"),
+        OpenApiParameter("has_wheelchair_access", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to wheelchair-accessible facilities"),
+        OpenApiParameter("has_emergency_service", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to facilities with emergency service"),
+        OpenApiParameter("is_verified", OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, description="Filter to verified facilities"),
+        OpenApiParameter("gbv_service_type", OpenApiTypes.STR, location=OpenApiParameter.QUERY, description="Comma-separated GBV service type codes (e.g. health,legal_aid)"),
     ],
     responses={200: FacilityListSerializer(many=True)},
     description="Get facilities near a specific location"
@@ -247,6 +275,32 @@ class FacilityTypesView(APIView):
             for value, label in Facility.FACILITY_TYPES
         ]
         return Response(data)
+
+@extend_schema(
+    tags=["Facilities"],
+    summary="List all GBV service type choices",
+    responses={200: inline_serializer(
+        name="GBVServiceType",
+        fields={
+            "value": drf_serializers.CharField(),
+            "label": drf_serializers.CharField(),
+        }
+    )}
+)
+class GBVServiceTypesView(APIView):
+    """
+    List all GBV service type choices
+    GET /api/facilities/gbv-service-types/
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        data = [
+            {"value": value, "label": label}
+            for value, label in GBVServiceProfile.SERVICE_TYPES
+        ]
+        return Response(data)
+
 
 @extend_schema(
     tags=["Facilities"],

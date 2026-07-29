@@ -15,6 +15,7 @@ urlpatterns = [
     # ── specific static paths first ───────────────────────────────────────
     path('types/',   views.FacilityTypesView.as_view(),  name='facility-types'),
     path('states/',  views.FacilityStatesView.as_view(), name='facility-states'),
+    path('gbv-service-types/', views.GBVServiceTypesView.as_view(), name='facility-gbv-service-types'),
     path('nearby/',  views.nearby_facilities,             name='nearby-facilities'),
     path('sarcs/',   sarc_views.SARCListView.as_view(),  name='sarc-list'),
     path('create/',  views.FacilityCreateView.as_view(), name='facility-create'),

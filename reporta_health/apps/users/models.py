@@ -85,7 +85,53 @@ class User(AbstractUser):
         full_name = f'{self.first_name} {self.last_name}'
         return full_name.strip() or self.email
     
+    otp_code = models.CharField(
+        _('otp code'),
+        max_length=6,
+        blank=True,
+        null=True,
+    )
+    otp_created_at = models.DateTimeField(
+        _('otp created at'),
+        blank=True,
+        null=True,
+    )
+
     @property
     def review_count(self):
         """Return total number of reviews submitted by user"""
         return self.reviews.count()
+
+    def generate_otp(self):
+        """Generate a new 6-digit OTP, store it, and return the code."""
+        import random
+        from django.utils import timezone
+
+        code = f"{random.randint(0, 999999):06d}"
+        self.otp_code = code
+        self.otp_created_at = timezone.now()
+        self.save(update_fields=['otp_code', 'otp_created_at'])
+        return code
+
+    def is_otp_valid(self, code):
+        """Check the given code matches and is within the 5-minute window."""
+        from django.utils import timezone
+        from datetime import timedelta
+
+        if not self.otp_code or not self.otp_created_at:
+            return False
+        if self.otp_code != code:
+            return False
+        if timezone.now() > self.otp_created_at + timedelta(minutes=5):
+            return False
+        return True
+
+    def seconds_until_otp_resend_allowed(self):
+        """Return seconds remaining before another OTP can be sent (rate limit: 1/min). 0 if allowed now."""
+        from django.utils import timezone
+
+        if not self.otp_created_at:
+            return 0
+        elapsed = (timezone.now() - self.otp_created_at).total_seconds()
+        remaining = 60 - elapsed
+        return max(0, int(remaining))

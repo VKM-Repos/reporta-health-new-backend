@@ -187,10 +187,11 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
     'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password/{uid}/{token}',
     'SERIALIZERS': {
+        'user_create_password_retype': 'apps.users.serializers.UserCreateSerializer',
         'user_create': 'apps.users.serializers.UserCreateSerializer',
         'user': 'apps.users.serializers.UserSerializer',
         'current_user': 'apps.users.serializers.UserSerializer',

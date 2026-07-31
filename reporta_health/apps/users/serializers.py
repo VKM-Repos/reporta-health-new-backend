@@ -3,7 +3,7 @@ Serializers for User model and authentication
 """
 
 from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from djoser.serializers import UserCreatePasswordRetypeSerializer as BaseUserCreateSerializer
 from .models import User
 
 
@@ -14,7 +14,17 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'phone_number', 'password', 're_password')
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'phone_number', 'password')
+
+    def create(self, validated_data):
+        user = super().create(validated_data)
+        user.is_active = False
+        user.save(update_fields=['is_active'])
+        from .emails import send_otp_email
+        user.generate_otp()
+        send_otp_email(user)
+        return user
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -61,3 +71,42 @@ class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'full_name', 'profile_picture', 'date_joined')
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6, min_length=6)
+
+    def validate(self, attrs):
+        try:
+            user = User.objects.get(email=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'No user found with this email.'})
+
+        if user.is_verified:
+            raise serializers.ValidationError({'email': 'This account is already verified.'})
+
+        if not user.is_otp_valid(attrs['code']):
+            raise serializers.ValidationError({'code': 'Invalid or expired code.'})
+
+        attrs['user'] = user
+        return attrs
+
+
+class ResendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate(self, attrs):
+        try:
+            user = User.objects.get(email=attrs['email'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'No user found with this email.'})
+
+        if user.is_verified:
+            raise serializers.ValidationError({'email': 'This account is already verified.'})
+
+        wait = user.seconds_until_otp_resend_allowed()
+        if wait > 0:
+            raise serializers.ValidationError({'email': f'Please wait {wait} seconds before requesting a new code.'})
+
+        attrs['user'] = user
+        return attrs

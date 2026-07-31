@@ -95,7 +95,8 @@ class FacilityReport(models.Model):
         ]
     
     def __str__(self):
-        return f"Report: {self.facility.name} - {self.get_reason_display()}"
+        facility_label = self.facility.name if self.facility_id else (self.facility_name or "(ghost facility)")
+        return f"Report: {facility_label} - {self.get_reason_display()}"
 
 
 def get_reports_storage():

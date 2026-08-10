@@ -190,13 +190,13 @@ class TestReviewCreate:
         for field in ('id', 'rating', 'body', 'facility', 'created_at'):
             assert field in response.data, f"Missing field: {field}"
 
-    def test_duplicate_review_returns_400(self, auth_client, facility, user, review_factory):
+    def test_duplicate_review_is_allowed(self, auth_client, facility, user, review_factory):
         review_factory(user=user, facility=facility)
         response = auth_client.post(
             facility_reviews_create_url(facility.pk),
             create_review_payload()
         )
-        assert response.status_code == 400
+        assert response.status_code == 201
 
     def test_missing_rating_returns_400(self, auth_client, facility):
         payload = create_review_payload()

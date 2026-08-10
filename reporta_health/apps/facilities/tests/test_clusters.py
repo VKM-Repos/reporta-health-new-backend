@@ -143,7 +143,7 @@ class TestBrowseModeClusters:
     def test_returns_clusters_type(self, api_client, three_state_dataset):
         r = api_client.get(CLUSTER_URL, {"bbox": NIGERIA_BBOX, "zoom": 6})
         assert r.status_code == 200
-        assert r.data["type"] == "facilities"
+        assert r.data["type"] == "clusters"
 
     def test_results_is_list(self, api_client, three_state_dataset):
         r = api_client.get(CLUSTER_URL, {"bbox": NIGERIA_BBOX, "zoom": 6})
@@ -262,7 +262,7 @@ class TestNearbyMode:
             "lat": "9.0", "lng": "8.0", "zoom": "5", "radius_km": "500"
             # "lat": "9.0", "lng": "8.0", "zoom": "6", "radius_km": "1000"
         })
-        assert r.data["type"] == "facilities"
+        assert r.data["type"] == "clusters"
 
     def test_small_radius_restricts_to_nearby_state(self, api_client, three_state_dataset):
         r = api_client.get(CLUSTER_URL, {

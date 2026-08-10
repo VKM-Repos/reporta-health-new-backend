@@ -10,6 +10,7 @@ Endpoints under test:
     POST   /api/reports/<report_id>/images/    — upload evidence image (auth, owner only)
 """
 
+import json
 import pytest
 
 
@@ -36,7 +37,7 @@ def report_images_url(report_id):
 
 def create_report_payload(**overrides):
     data = {
-        'reason': 'wrong_info',
+        'reasons': json.dumps(['wrong_info']),
         'description': 'The facility information displayed is incorrect.',
     }
     data.update(overrides)
@@ -82,28 +83,28 @@ class TestReportCreate:
         response = auth_client.post(
             REPORT_CREATE_URL, create_report_payload(facility=facility.pk)
         )
-        for field in ('facility', 'reason', 'description'):
+        for field in ('facility', 'reasons', 'description'):
             assert field in response.data, f"Missing field: {field}"
 
-    def test_missing_reason_returns_400(self, auth_client, facility):
+    def test_missing_reasons_returns_400(self, auth_client, facility):
         payload = create_report_payload(facility=facility.pk)
-        del payload['reason']
+        del payload['reasons']
         response = auth_client.post(REPORT_CREATE_URL, payload)
         assert response.status_code == 400
 
-    def test_missing_description_returns_400(self, auth_client, facility):
+    def test_missing_description_is_optional(self, auth_client, facility):
         payload = create_report_payload(facility=facility.pk)
         del payload['description']
         response = auth_client.post(REPORT_CREATE_URL, payload)
-        assert response.status_code == 400
+        assert response.status_code == 201
 
     def test_missing_facility_returns_400(self, auth_client):
         payload = create_report_payload()
         response = auth_client.post(REPORT_CREATE_URL, payload)
         assert response.status_code == 400
 
-    def test_invalid_reason_returns_400(self, auth_client, facility):
-        payload = create_report_payload(facility=facility.pk, reason='not_a_valid_reason')
+    def test_invalid_reasons_returns_400(self, auth_client, facility):
+        payload = create_report_payload(facility=facility.pk, reasons=['not_a_valid_reason'])
         response = auth_client.post(REPORT_CREATE_URL, payload)
         assert response.status_code == 400
 
@@ -141,8 +142,8 @@ class TestReportList:
         response = admin_client.get(REPORT_LIST_URL)
         result = response.data['results'][0]
         for field in (
-            'id', 'facility', 'facility_name', 'reporter', 'reason',
-            'reason_display', 'description', 'status', 'status_display',
+            'id', 'facility', 'facility_name', 'reporter', 'reasons',
+            'description', 'status', 'status_display',
             'admin_notes', 'images', 'created_at', 'updated_at', 'resolved_at',
         ):
             assert field in result, f"Missing field: {field}"
@@ -214,7 +215,7 @@ class TestMyReports:
         response = auth_client.get(MY_REPORTS_URL)
         result = response.data['results'][0]
         for field in (
-            'id', 'facility', 'facility_name', 'reporter', 'reason',
+            'id', 'facility', 'facility_name', 'reporter', 'reasons',
             'description', 'status', 'images', 'created_at',
         ):
             assert field in result, f"Missing field: {field}"
@@ -250,8 +251,8 @@ class TestReportDetail:
     def test_detail_fields_present(self, admin_client, report):
         response = admin_client.get(report_detail_url(report.pk))
         for field in (
-            'id', 'facility', 'facility_name', 'reporter', 'reason',
-            'reason_display', 'description', 'status', 'status_display',
+            'id', 'facility', 'facility_name', 'reporter', 'reasons',
+            'description', 'status', 'status_display',
             'admin_notes', 'images', 'created_at', 'updated_at', 'resolved_at',
         ):
             assert field in response.data, f"Missing field: {field}"

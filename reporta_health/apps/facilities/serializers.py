@@ -5,9 +5,20 @@ Serializers for Facility models
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from django.contrib.gis.geos import Point
-from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark, GBVServiceProfile, SARCProfile
+from .models import Facility, FacilityImage, FacilityViewHistory, FacilityBookmark, GBVServiceProfile, SARCProfile, Service
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    """
+    Nested serializer for a facility's structured services (HFR taxonomy).
+    """
+    category_label = serializers.CharField(source='get_category_display', read_only=True)
+
+    class Meta:
+        model = Service
+        fields = ('id', 'name', 'category', 'category_label')
 
 
 class FacilityImageSerializer(serializers.ModelSerializer):
@@ -135,6 +146,7 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
     operating_hours = serializers.SerializerMethodField()
     gbv_profile = GBVServiceProfileSerializer(read_only=True)  # added: nested GBV profile
     sarc_profile = SARCProfileInlineSerializer(read_only=True)  # added: nested SARC profile
+    services_offered = ServiceSerializer(many=True, read_only=True)  # added: structured HFR services
     
     class Meta:
         model = Facility
@@ -151,6 +163,7 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
             'website',
             'description',
             'services',
+            'services_offered',
             'operating_hours',
             'has_parking',
             'has_wheelchair_access',

@@ -9,6 +9,48 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
 
+
+class Service(models.Model):
+    """
+    General facility service/capability catalog.
+    Sourced from the national HFR services taxonomy (23 items, 8 categories).
+    Distinct from GBVServiceProfile.SERVICE_TYPES, which is GBV-specific.
+    """
+    CATEGORIES = [
+        ('clinical', 'Clinical'),
+        ('diagnostics', 'Diagnostics'),
+        ('pharmacy', 'Pharmacy'),
+        ('gbv', 'GBV'),
+        ('legal', 'Legal'),
+        ('security', 'Security'),
+        ('specialised', 'Specialised'),
+        ('support', 'Support'),
+    ]
+
+    name = models.CharField(_('service name'), max_length=96, unique=True)
+    category = models.CharField(
+        _('category'),
+        max_length=32,
+        choices=CATEGORIES,
+        db_index=True,
+    )
+    hfr_service_id = models.IntegerField(
+        _('HFR service ID'),
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_('service_id from the national HFR services table'),
+    )
+
+    class Meta:
+        verbose_name = _('service')
+        verbose_name_plural = _('services')
+        ordering = ['category', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_category_display()})"
+
+
 class Facility(models.Model):
     """
     Health facility model with geospatial location
@@ -128,6 +170,12 @@ class Facility(models.Model):
         _('services offered'),
         blank=True,
         help_text=_('Comma-separated list of services')
+    )
+    services_offered = models.ManyToManyField(
+        Service,
+        related_name='facilities',
+        blank=True,
+        help_text=_('Structured services this facility provides (HFR taxonomy)'),
     )
     
     # Operating Hours (can be expanded to have separate model)

@@ -8,7 +8,8 @@ from .models import User
 from .serializers import UserSerializer, UserUpdateSerializer
 from rest_framework.views import APIView
 from .serializers import VerifyOTPSerializer, ResendOTPSerializer
-from .emails import send_otp_email
+# from .emails import send_otp_email  # disabled — SMTP not fully configured, see ResendOTPView
+import logging
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.core.throttling import AuthRateThrottle
@@ -94,6 +95,14 @@ class ResendOTPView(APIView):
         user = serializer.validated_data['user']
 
         user.generate_otp()
-        send_otp_email(user)
+        # SMTP is not fully configured yet — sending here was blocking the
+        # request and killing gunicorn workers (502s). Re-enable once email
+        # is properly set up, ideally via an async task (Celery/Django-Q)
+        # rather than synchronously in the request.
+        # send_otp_email(user)
+        logging.getLogger(__name__).info(
+            "OTP resent (email disabled)",
+            extra={"user_id": user.pk, "email": user.email, "otp_code": user.otp_code},
+        )
 
         return Response({'detail': 'A new code has been sent.'}, status=status.HTTP_200_OK)

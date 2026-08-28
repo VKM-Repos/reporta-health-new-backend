@@ -73,7 +73,6 @@ class FacilityListView(generics.ListAPIView):
     filterset_class = FacilityFilter
     search_fields = ['name', 'description', 'services', 'address']
     ordering_fields = ['name', 'average_rating', 'created_at', 'total_reviews', 'distance']
-    ordering = ['-average_rating']
     pagination_class = FacilityPagination  
 
     def get_queryset(self):
@@ -81,8 +80,16 @@ class FacilityListView(generics.ListAPIView):
             Prefetch('images', queryset=FacilityImage.objects.filter(is_primary=True))
         )
         user_location = get_user_location_from_params(self.request)
+        has_explicit_ordering = bool(self.request.query_params.get('ordering'))
         if user_location:
             qs = qs.annotate(distance=Distance('location', user_location))
+            # Default to closest-first when we have the user's location,
+            # unless the client explicitly asked for a different ordering
+            if not has_explicit_ordering:
+                qs = qs.order_by('distance')
+        elif not has_explicit_ordering:
+            # preserved: original default ordering when no location is available
+            qs = qs.order_by('-average_rating')
         return qs
 
 
@@ -138,33 +145,25 @@ def nearby_facilities(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Get search radius (default 10km, matches cluster view)
-    try:
-        radius_km = float(request.query_params.get('radius_km', 10))
-    except ValueError:
-        radius_km = 10
-    
     # Create user location point
     user_location = Point(longitude, latitude, srid=4326)
     
-    # Query facilities within radius
+    # No radius cutoff — nearest facility is always returned, however far
+    # away it is. select_related('sarc_profile') fixes a missing-relation
+    # bug that was masked before by the small radius+limit combo.
     queryset = Facility.objects.filter(
-        is_active=True,
-        location__distance_lte=(user_location, D(km=radius_km))
-    ).annotate(
+        is_active=True
+    ).select_related('sarc_profile').prefetch_related('images').annotate(
         distance=Distance('location', user_location)
-    ).select_related().prefetch_related('images').order_by('distance')
+    ).order_by('distance')
     
     # Apply all common filters (facility_type, state, has_gbv_services, has_sarcs, has_fistula_programme)
     queryset = apply_common_filters(queryset, request.query_params)
     
-    # Apply limit
-    try:
-        limit = int(request.query_params.get('limit', 20))
-        # limit = int(limit_param) if limit_param else 20
-    except (ValueError, TypeError):
-        limit = 20
-    # limit = int(request.query_params.get('limit', 20))
+    # Capped, not radius-limited: this endpoint has no pagination class, so
+    # without *some* limit a nationwide result set can time out the worker
+    # trying to serialize it in one synchronous response.
+    limit = min(int(request.query_params.get('limit', 50)), 200)
     queryset = queryset[:limit]
     
     # Serialize and return

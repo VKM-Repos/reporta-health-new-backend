@@ -19,12 +19,20 @@ from apps.reviews.serializers import ReviewSerializer
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
     """JWT login with rate limiting."""
-    throttle_classes = [AuthRateThrottle]
+    # Throttle temporarily disabled — dev/staging only, NOT for production.
+    # AnonRateThrottle keys off client IP, and NUM_PROXIES isn't configured,
+    # so requests through web.reportahealth.org (extra proxy hop) were
+    # collapsing to a shared IP and throttling all users on that domain
+    # together. Re-enable once NUM_PROXIES / proxy topology is sorted.
+    # throttle_classes = [AuthRateThrottle]
+    throttle_classes = []
 
 
 class ThrottledTokenRefreshView(TokenRefreshView):
     """JWT refresh with rate limiting."""
-    throttle_classes = [AuthRateThrottle]
+    # See note above — disabled temporarily for dev/staging.
+    # throttle_classes = [AuthRateThrottle]
+    throttle_classes = []
 
 
 class CurrentUserView(generics.RetrieveUpdateAPIView):

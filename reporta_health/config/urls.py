@@ -53,10 +53,6 @@ urlpatterns = [
     path('api/v1/auth/jwt/refresh/', ThrottledTokenRefreshView.as_view(), name='jwt-refresh'),
     path('api/v1/auth/', include('djoser.urls')),
     path('api/v1/auth/', include('djoser.urls.jwt')),
-
-        # Authentication (Djoser)
-    path('api/auth/', include('djoser.urls')),
-    path('api/auth/', include('djoser.urls.jwt')),
     
     # App URLs
     path('api/', include(router.urls)),

@@ -99,14 +99,10 @@ class SARCListView(APIView):
             try:
                 lat = float(lat)
                 lng = float(lng)
-                radius = min(
-                    int(request.query_params.get('radius', 10000)),
-                    MAX_RADIUS  # cap radius
-                )
+                # No radius cutoff — distance is annotated and ordered so the
+                # nearest SARC is always returned, however far away it is.
                 user_location = Point(lng, lat, srid=4326)
-                qs = qs.filter(
-                    location__distance_lte=(user_location, D(m=radius))
-                ).annotate(
+                qs = qs.annotate(
                     distance=Distance('location', user_location)
                 ).order_by('distance')
             except (TypeError, ValueError):

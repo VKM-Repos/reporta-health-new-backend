@@ -105,7 +105,7 @@ class FacilityListSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.FLOAT)
     def get_distance(self, obj):
         """Get distance from user location if available"""
-        if hasattr(obj, 'distance'):
+        if getattr(obj, 'distance', None) is not None:
             return round(obj.distance.m, 2)  # Distance in meters
         return None
     

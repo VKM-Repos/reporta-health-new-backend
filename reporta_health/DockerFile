@@ -12,6 +12,9 @@ WORKDIR /app
 # Install system dependencies for GeoDjango + PostGIS
 RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
     libproj-dev \
     gdal-bin \
     libgdal-dev \

@@ -110,17 +110,13 @@ class FacilityClusterView(APIView):
         except (ValueError, TypeError):
             zoom = 6
 
-        try:
-            radius_km = float(params.get("radius_km", 10))
-            if radius_km <= 0 or radius_km > 500:
-                return Response({"error": "radius_km must be between 0 and 500"}, status=400)
-        except (ValueError, TypeError):
-            return Response({"error": "Invalid radius_km"}, status=status.HTTP_400_BAD_REQUEST)
-
+        # radius_km no longer constrains results — distance is annotated and
+        # ordered instead, so the nearest facility is always returned even if
+        # it's far away. Clustering downstream keeps map rendering manageable.
         user_point = Point(lng, lat, srid=4326)
         qs = (
             Facility.objects
-            .filter(is_active=True, location__distance_lte=(user_point, D(km=radius_km)))
+            .filter(is_active=True)
             .annotate(distance=Distance("location", user_point))
             .order_by("distance")
         )

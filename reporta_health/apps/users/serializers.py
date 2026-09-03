@@ -21,17 +21,8 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         user.is_active = False
         user.save(update_fields=['is_active'])
         user.generate_otp()
-        # SMTP is not fully configured yet — sending here was blocking the
-        # request for 2+ minutes and killing gunicorn workers (502s).
-        # Re-enable once email is properly set up, ideally via an async
-        # task (Celery/Django-Q) rather than synchronously in the request.
-        # from .emails import send_otp_email
-        # send_otp_email(user)
-        import logging
-        logging.getLogger(__name__).info(
-            "OTP generated (email disabled)",
-            extra={"user_id": user.pk, "email": user.email, "otp_code": user.otp_code},
-        )
+        from .emails import send_otp_email
+        send_otp_email(user)
         return user
 
 

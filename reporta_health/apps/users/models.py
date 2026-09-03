@@ -2,9 +2,23 @@
 Custom User model for Reporta Health
 """
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+
+class CaseInsensitiveUserManager(UserManager):
+    """
+    Default UserManager.get_by_natural_key() does a case-sensitive match on
+    USERNAME_FIELD (email, here). That means a login with different
+    capitalization than what's stored (e.g. Foo@Gmail.com vs foo@gmail.com)
+    fails with 'No active account found' even with the correct password.
+    Email addresses are conventionally treated case-insensitively, so this
+    overrides the lookup to match on email__iexact instead.
+    """
+    def get_by_natural_key(self, username):
+        case_insensitive_field = f"{self.model.USERNAME_FIELD}__iexact"
+        return self.get(**{case_insensitive_field: username})
 
 
 class User(AbstractUser):
@@ -28,6 +42,8 @@ class User(AbstractUser):
         blank=True
     )
     email = models.EmailField(_('email address'), unique=True)
+
+    objects = CaseInsensitiveUserManager()
     
     # Additional fields
     phone_number = models.CharField(

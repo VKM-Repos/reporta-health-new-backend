@@ -3,6 +3,7 @@ Views for user profile and related endpoints
 """
 
 from rest_framework import generics, permissions, status
+from django.utils import timezone
 from rest_framework.response import Response
 from .models import User
 from .serializers import UserSerializer, UserUpdateSerializer
@@ -95,11 +96,21 @@ class ResendOTPView(APIView):
     Body: {"email": "..."}
     """
     permission_classes = [permissions.AllowAny]
+    COOLDOWN_SECONDS = 60
 
     def post(self, request):
         serializer = ResendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+
+        if user.otp_created_at:
+            elapsed = (timezone.now() - user.otp_created_at).total_seconds()
+            remaining = self.COOLDOWN_SECONDS - elapsed
+            if remaining > 0:
+                return Response(
+                    {'detail': 'Please wait before requesting another code.', 'retry_after': int(remaining)},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
 
         user.generate_otp()
         from .emails import send_otp_email

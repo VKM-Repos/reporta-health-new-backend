@@ -183,6 +183,9 @@ SIMPLE_JWT = {
 }
 
 # Djoser Settings (Authentication endpoints)
+DOMAIN = config('FRONTEND_DOMAIN', default='reportahealth.netlify.app')
+SITE_NAME = 'Reporta Health'
+
 DJOSER = {
     'USER_ID_FIELD': 'id',
     'LOGIN_FIELD': 'email',
@@ -192,6 +195,8 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password/{uid}/{token}',
+    'DOMAIN': config('FRONTEND_DOMAIN', default='reportahealth.netlify.app'),
+    'SITE_NAME': 'Reporta Health',
     'SERIALIZERS': {
         'user_create_password_retype': 'apps.users.serializers.UserCreateSerializer',
         'user_create': 'apps.users.serializers.UserCreateSerializer',

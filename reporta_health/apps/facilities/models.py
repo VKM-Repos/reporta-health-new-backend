@@ -126,6 +126,43 @@ class Facility(models.Model):
             db_index=True,
             help_text=_('Reference ID from the legacy HFR system'),
         )
+    nhia_accepted = models.BooleanField(
+        _('NHIA accredited'),
+        default=False,
+        db_index=True,
+        help_text=_('Does this facility accept NHIA (national health insurance)?'),
+    )
+    nhia_code = models.CharField(
+        _('NHIA code'),
+        max_length=255,
+        blank=True,
+        help_text=_('NHIA accreditation code(s), semicolon-separated if multiple'),
+    )
+    ward = models.CharField(
+        _('ward'),
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text=_('Ward — sub-LGA administrative area'),
+    )
+    license_status = models.CharField(
+        _('license status'),
+        max_length=100,
+        blank=True,
+        help_text=_('Facility license/registration status from source registry'),
+    )
+    availability = models.CharField(
+        _('availability'),
+        max_length=100,
+        blank=True,
+        help_text=_('Reported availability status (e.g. 24 hours, weekdays)'),
+    )
+    cost = models.CharField(
+        _('cost'),
+        max_length=100,
+        blank=True,
+        help_text=_('Reported cost tier or fee information'),
+    )
     facility_type = models.CharField(
         _('facility type'),
         max_length=50,
